@@ -1,11 +1,3 @@
-// import dotenv from "dotenv";
-// import path from "path";
-
-// // Använd absolut sökväg för att ladda in .env från projektets rotkatalog
-// dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
-// console.log("JWT_SECRET från .env:", process.env.JWT_SECRET);
-
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -16,9 +8,6 @@ const __dirname = path.dirname(__filename);
 
 // Använd absolut sökväg för att ladda in .env från projektets rotkatalog
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-
-// Kontrollera att miljövariabeln är laddad
-console.log("JWT_SECRET från .env:", process.env.JWT_SECRET);
 
 import express from "express";
 import bcrypt from "bcryptjs";
@@ -99,8 +88,10 @@ app.post("/login", async (req, res) => {
 // Middleware för att verifiera JWT och roller
 const verifyToken = (role) => (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
+  console.log("kollar token: ", token);
 
   if (!token) {
+    console.log("Ingen token hittades - blockad åtkomst");
     return res.status(401).json({ message: "Ingen token angiven" });
   }
 
@@ -108,12 +99,15 @@ const verifyToken = (role) => (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
 
+    console.log("Token verifierad: ", decoded);
+
     if (role !== undefined && req.user.access_level < role) {
       return res.status(403).json({ message: "Åtkomst nekad" });
     }
 
     next();
   } catch (err) {
+    console.log("Token fel - blockad");
     return res.status(401).json({ message: "Ogiltig token" });
   }
 };
