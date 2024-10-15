@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton";
+import "../styles/PageLayout.css";
 
 const UserPage: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -47,10 +48,12 @@ const UserPage: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="user-page">
-      <h1>Användarsida</h1>
-      <p>{message}</p>
+    <div className="page-layout">
       {isLoggedIn && <LogoutButton />}
+      <div className="page-content">
+        <h1 className="page-title">Användarsida</h1>
+        <p>{message}</p>
+      </div>
     </div>
   );
 };

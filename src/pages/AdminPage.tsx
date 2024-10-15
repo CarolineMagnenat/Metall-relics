@@ -3,17 +3,20 @@ import { useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton";
 
 const AdminPage: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setMessage("Ingen token hittades. Omdirigerar till inloggningssidan...");
+      setMessage("Knas du saknar nått, skickar dej till inloggningssidan...");
       setTimeout(() => {
         navigate("/");
       }, 1500);
       return;
+    } else {
+      setIsLoggedIn(true);
     }
 
     const fetchAdminPage = async () => {
@@ -43,10 +46,12 @@ const AdminPage: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="admin-page">
-      <h1>Adminsida</h1>
-      <p>{message}</p>
-      <LogoutButton />
+    <div className="page-layout">
+      {isLoggedIn && <LogoutButton />}
+      <div className="page-content">
+        <h1 className="page-title">Adminsida</h1>
+        <p>{message}</p>
+      </div>
     </div>
   );
 };

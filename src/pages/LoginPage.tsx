@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode"; // Korrekt import av jwt-decode för TypeScript
+import "../styles/LoginPage.css";
 
 // Definiera ett interface för token-payloaden
 interface DecodedJwtPayload {
@@ -66,9 +67,9 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="login-page">
-      <h1>Inloggning</h1>
-      <form onSubmit={handleLogin}>
-        <div>
+      <h1 className="login-title">Inloggning</h1>
+      <form className="login-form" onSubmit={handleLogin}>
+        <div className="form-group">
           <label htmlFor="username">Användarnamn:</label>
           <input
             type="text"
@@ -78,7 +79,7 @@ const LoginPage: React.FC = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="password">Lösenord:</label>
           <input
             type="password"
@@ -88,9 +89,11 @@ const LoginPage: React.FC = () => {
             required
           />
         </div>
-        <button type="submit">Logga in</button>
+        <button className="login-button" type="submit">
+          Logga in
+        </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="login-message">{message}</p>}
     </div>
   );
 };
