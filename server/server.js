@@ -1,12 +1,30 @@
+// import dotenv from "dotenv";
+// import path from "path";
+
+// // Använd absolut sökväg för att ladda in .env från projektets rotkatalog
+// dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+// console.log("JWT_SECRET från .env:", process.env.JWT_SECRET);
+
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Definiera __dirname med ES-moduler
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Använd absolut sökväg för att ladda in .env från projektets rotkatalog
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+// Kontrollera att miljövariabeln är laddad
+console.log("JWT_SECRET från .env:", process.env.JWT_SECRET);
+
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mariadb from "mariadb";
 import cors from "cors";
-import dotenv from "dotenv";
-
-dotenv.config(); // Laddar in miljövariabler från .env-filen
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -32,7 +50,7 @@ pool
     process.exit(1); // Avslutar processen om databasanslutningen misslyckas
   });
 
-// Secret key for JWT from .env
+// // Secret key for JWT from .env
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
