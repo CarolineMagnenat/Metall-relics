@@ -1,6 +1,11 @@
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import mariadb from "mariadb";
+import cors from "cors";
 
 // Definiera __dirname med ES-moduler
 const __filename = fileURLToPath(import.meta.url);
@@ -9,11 +14,6 @@ const __dirname = path.dirname(__filename);
 // Använd absolut sökväg för att ladda in .env från projektets rotkatalog
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-import express from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import mariadb from "mariadb";
-import cors from "cors";
 const app = express();
 app.use(cors());
 app.use(express.json());

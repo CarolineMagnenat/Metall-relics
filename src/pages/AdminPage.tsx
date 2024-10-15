@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LogoutButton from "../components/LogoutButton";
 
 const AdminPage: React.FC = () => {
   const [message, setMessage] = useState<string>("");
@@ -45,6 +46,7 @@ const AdminPage: React.FC = () => {
     <div className="admin-page">
       <h1>Adminsida</h1>
       <p>{message}</p>
+      <LogoutButton />
     </div>
   );
 };

@@ -34,21 +34,28 @@ const LoginPage: React.FC = () => {
       if (response.ok) {
         // Spara tokenen i localStorage
         localStorage.setItem("token", data.token);
+        console.log("token", data.token);
         setMessage("Inloggning lyckades!");
 
         // Dekryptera tokenen för att kontrollera användarrollen
         const decodedToken = jwtDecode<DecodedJwtPayload>(data.token);
+        console.log("decodedToken: ", decodedToken);
 
-        // Kontrollera access level och navigera till rätt sida
-        if (decodedToken.access_level === 2) {
-          // Administratör: omdirigera till adminsidan
-          navigate("/adminpage");
-        } else {
-          // Vanlig användare: omdirigera till användarsidan
-          navigate("/userpage");
-        }
+        setTimeout(() => {
+          if (decodedToken.access_level === 2) {
+            // Administratör: omdirigera till adminsidan
+            console.log("Omdirigerar till adminsidan");
+            navigate("/adminpage");
+          } else if (decodedToken.access_level === 1) {
+            // Vanlig användare: omdirigera till användarsidan
+            console.log("Omdirigerar till användarsidan");
+            navigate("/userpage");
+          } else {
+            console.log("Okänd access level, omdirigerar till startsidan");
+            navigate("/");
+          }
+        }, 500); // Vänta en halv sekund innan omdirigering
       } else {
-        // Visa felmeddelande om inloggningen misslyckades
         setMessage(data.message || "Inloggning misslyckades");
       }
     } catch (error) {
