@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import jwtDecode from "jwt-decode"; // Korrekt import av jwt-decode för TypeScript
 import "../styles/LoginPage.css";
-
-// Definiera ett interface för token-payloaden
-interface DecodedJwtPayload {
-  username: string;
-  access_level: number;
-  iat: number;
-  exp: number;
-}
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -28,40 +19,41 @@ const LoginPage: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
+        credentials: "include",
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        // Spara tokenen i localStorage
-        localStorage.setItem("token", data.token);
-        console.log("token", data.token);
         setMessage("Inloggning lyckades!");
 
-        // Dekryptera tokenen för att kontrollera användarrollen
-        const decodedToken = jwtDecode<DecodedJwtPayload>(data.token);
-        console.log("decodedToken: ", decodedToken);
+        // hämtar användarinfo
+        const userInfoResponse = await fetch("http://localhost:3000/userinfo", {
+          method: "GET",
+          credentials: "include", // Inkludera cookies i begäran
+        });
 
-        setTimeout(() => {
-          if (decodedToken.access_level === 2) {
-            // Administratör: omdirigera till adminsidan
+        if (userInfoResponse.ok) {
+          const userData = await userInfoResponse.json();
+
+          if (userData.access_level === 2) {
             console.log("Omdirigerar till adminsidan");
             navigate("/adminpage");
-          } else if (decodedToken.access_level === 1) {
-            // Vanlig användare: omdirigera till användarsidan
+          } else if (userData.access_level === 1) {
             console.log("Omdirigerar till användarsidan");
             navigate("/userpage");
           } else {
-            console.log("Okänd access level, omdirigerar till startsidan");
+            console.log("Okänd access roll, omdirigerar till startsidan");
             navigate("/");
           }
-        }, 500); // Vänta en halv sekund innan omdirigering
+        } else {
+          setMessage("Misslyckades att hämta användarinfo");
+        }
       } else {
+        const data = await response.json();
         setMessage(data.message || "Inloggning misslyckades");
       }
     } catch (error) {
-      console.error("Fel vid inloggning:", error);
-      setMessage("Serverfel, försök igen senare.");
+      console.error("Något gick fel vid inloggning:", error);
+      setMessage("Något gick fel vid inloggning, försök igen senare");
     }
   };
 

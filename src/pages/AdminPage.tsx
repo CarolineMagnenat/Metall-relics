@@ -8,28 +8,17 @@ const AdminPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setMessage("Knas du saknar nått, skickar dej till inloggningssidan...");
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
-      return;
-    } else {
-      setIsLoggedIn(true);
-    }
-
     const fetchAdminPage = async () => {
       try {
         const response = await fetch("http://localhost:3000/adminpage", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          method: "GET",
+          credentials: "include", // Skicka cookies automatiskt
         });
 
         if (response.ok) {
           const data = await response.json();
           setMessage(data.message);
+          setIsLoggedIn(true); // Inloggning lyckades
         } else {
           setMessage("Åtkomst nekad. Omdirigerar till inloggningssidan...");
           setTimeout(() => {
