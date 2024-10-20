@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import LogoutButton from "../components/LogoutButton";
 import LoginButton from "../components/LoginButton";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import "../styles/PageLayout.css";
 
 const StorePage: React.FC = () => {
@@ -28,7 +28,7 @@ const StorePage: React.FC = () => {
 
     // Kör kontrollen när komponenten laddas
     checkLoginStatus();
-  }, []);
+  }, [setIsLoggedIn]);
 
   return (
     <div className="page-layout">
