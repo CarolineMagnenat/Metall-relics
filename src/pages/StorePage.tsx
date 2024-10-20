@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import LogoutButton from "../components/LogoutButton";
 import LoginButton from "../components/LoginButton";
 import { useAuth } from "../context/useAuth";
+import Cookies from "js-cookie";
 import "../styles/PageLayout.css";
 
 const StorePage: React.FC = () => {
@@ -9,24 +10,19 @@ const StorePage: React.FC = () => {
 
   useEffect(() => {
     const checkLoginStatus = () => {
-      // Hämta alla cookies som ett objekt
-      const cookies = document.cookie
-        .split(";")
-        .map((cookie) => cookie.trim())
-        .reduce((acc, cookie) => {
-          const [key, value] = cookie.split("=");
-          acc[key] = value;
-          return acc;
-        }, {} as Record<string, string>);
+      setTimeout(() => {
+        const token = Cookies.get("token");
 
-      if (cookies.token) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
+        if (token) {
+          console.log("Token hittades, användare är inloggad.");
+          setIsLoggedIn(true);
+        } else {
+          console.log("Ingen token hittades, användare är inte inloggad.");
+          setIsLoggedIn(false);
+        }
+      }, 500);
     };
 
-    // Kör kontrollen när komponenten laddas
     checkLoginStatus();
   }, [setIsLoggedIn]);
 

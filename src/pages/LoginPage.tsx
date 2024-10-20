@@ -24,10 +24,18 @@ const LoginPage: React.FC = () => {
 
       if (response.ok) {
         setMessage("Inloggning lyckades!");
-        navigate("/");
-      } else {
-        const data = await response.json();
-        setMessage(data.message);
+
+        const userInfoResponse = await fetch("http://localhost:3000/userinfo", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (userInfoResponse.ok) {
+          navigate("/");
+        } else {
+          const data = await response.json();
+          setMessage(data.message);
+        }
       }
     } catch (error) {
       console.error("Något gick fel vid inloggning:", error);

@@ -72,11 +72,8 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    console.log("Original användarnamn:", username);
     // Sanera användarnamn för att undvika XSS
     let sanitizedUsername = validator.escape(username);
-
-    console.log("Sanerat användarnamn:", sanitizedUsername);
 
     const conn = await pool.getConnection();
     const result = await conn.query("SELECT * FROM logins WHERE username = ?", [
@@ -107,10 +104,11 @@ app.post("/login", async (req, res) => {
 
     // Sätt JWT-token i HttpOnly, Secure cookie
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Sätt till true i produktion
-      sameSite: "Strict", // eller 'Lax' baserat på dina behov
+      httpOnly: false,
+      secure: false,
+      sameSite: "Lax", // eller 'Lax' baserat på dina behov
       maxAge: 60 * 60 * 1000, // 1 timme
+      path: "/",
     });
 
     return res.json({
@@ -129,7 +127,7 @@ app.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // Se till att sätta till true i produktion
-    sameSite: "Strict",
+    sameSite: "Lax",
   });
 
   res.status(200).json({ message: "Utloggad och cookie raderad" });
@@ -137,7 +135,7 @@ app.post("/logout", (req, res) => {
 
 // Middleware för att verifiera JWT och roller
 const verifyToken = (role) => (req, res, next) => {
-  console.log("Cookies på serversidan:", req.cookies);
+  // console.log("Cookies på serversidan:", req.cookies);
 
   const token = req.cookies.token;
 
