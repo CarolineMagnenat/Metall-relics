@@ -10,12 +10,13 @@
 }
 
 .page-content {
+  margin-top: 10px;
   background-color: #ffffff; /* Vit bakgrund för huvudinnehållet */
   padding: 40px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lätt skugga för att ge djup */
   text-align: center; /* Centrera texten */
-  max-width: 600px;
+  max-width: 80%;
   width: 100%;
 }
 

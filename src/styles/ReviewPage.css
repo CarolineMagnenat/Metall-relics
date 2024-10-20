@@ -1,0 +1,36 @@
+.review-page {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.review-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.review-button {
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.review-message {
+  margin-top: 15px;
+  font-weight: bold;
+}

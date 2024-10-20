@@ -1,12 +1,15 @@
 import React, { useEffect } from "react";
 import LogoutButton from "../components/LogoutButton";
 import LoginButton from "../components/LoginButton";
+import ReviewList from "../components/ReviewList";
 import { useAuth } from "../context/useAuth";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import "../styles/PageLayout.css";
 
 const StorePage: React.FC = () => {
   const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -31,6 +34,13 @@ const StorePage: React.FC = () => {
       {isLoggedIn ? <LogoutButton /> : <LoginButton />}
       <div className="page-content">
         <h1 className="page-title">HÄR ÄR AFFÄREN!</h1>
+        <button
+          className="review-button"
+          onClick={() => navigate("/review")} // Navigerar till ReviewPage
+        >
+          Lämna en recension
+        </button>
+        <ReviewList />
       </div>
     </div>
   );

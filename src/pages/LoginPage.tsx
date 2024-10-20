@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import "../styles/LoginPage.css";
 
 const LoginPage: React.FC = () => {
@@ -7,6 +8,7 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
+  const { setIsLoggedIn, setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -31,6 +33,12 @@ const LoginPage: React.FC = () => {
         });
 
         if (userInfoResponse.ok) {
+          const userData = await userInfoResponse.json();
+          console.log("Användarinformation efter inloggning:", userData);
+
+          // Spara användarinformationen i AuthContext
+          setIsLoggedIn(true);
+          setUser(userData);
           navigate("/");
         } else {
           const data = await response.json();

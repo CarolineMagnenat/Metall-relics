@@ -178,6 +178,82 @@ app.get("/adminpage", verifyToken(2), (req, res) => {
   res.json({ message: "Välkommen till adminsidan!" });
 });
 
+// POST /reviews för att ta emot recensioner från användare och spara i databasen
+app.post("/reviews", async (req, res) => {
+  const { username, review } = req.body;
+
+  if (!review) {
+    return res.status(400).json({ message: "Recension krävs" });
+  }
+
+  try {
+    const conn = await pool.getConnection();
+
+    const reviewer = username || "Anonym";
+
+    // Infoga recensionen i databasen
+    await conn.query("INSERT INTO reviews (username, review) VALUES (?, ?)", [
+      reviewer,
+      review,
+    ]);
+
+    // Frigör anslutningen
+    conn.release();
+
+    return res.status(201).json({ message: "Recensionen mottagen och sparad" });
+  } catch (error) {
+    console.error("Fel vid sparande av recension:", error);
+    return res
+      .status(500)
+      .json({ message: "Serverfel vid sparande av recension" });
+  }
+});
+
+// GET /reviews för att hämta alla recensioner från databasen
+app.get("/reviews", async (req, res) => {
+  try {
+    // Skapa en anslutning till databasen
+    const conn = await pool.getConnection();
+
+    // Hämta alla recensioner
+    const reviews = await conn.query(
+      "SELECT * FROM reviews ORDER BY created_at DESC"
+    );
+
+    // Frigör anslutningen
+    conn.release();
+
+    return res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Fel vid hämtning av recensioner:", error);
+    return res
+      .status(500)
+      .json({ message: "Serverfel vid hämtning av recensioner" });
+  }
+});
+
+// DELETE /reviews/:id för att ta bort en recension
+app.delete("/reviews/:id", verifyToken(2), async (req, res) => {
+  const reviewId = req.params.id;
+
+  try {
+    const conn = await pool.getConnection();
+    const result = await conn.query("DELETE FROM reviews WHERE id = ?", [
+      reviewId,
+    ]);
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Recension ej funnen" });
+    }
+
+    return res.status(200).json({ message: "Recension raderad" });
+  } catch (error) {
+    console.error("Serverfel vid radering av recension:", error);
+    return res.status(500).json({ message: "Serverfel" });
+  }
+});
+
 // Starta servern på port 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
