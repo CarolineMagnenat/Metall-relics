@@ -4,19 +4,22 @@ import LoginPage from "./pages/LoginPage";
 import UserPage from "./pages/UserPage";
 import AdminPage from "./pages/AdminPage";
 import StorePage from "./pages/StorePage";
+import { AuthProvider } from "./context/AuthContext";
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/userpage" element={<UserPage />} />
-          <Route path="/adminpage" element={<AdminPage />} />
-          <Route path="/store" element={<StorePage />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<StorePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/userpage" element={<UserPage />} />
+            <Route path="/adminpage" element={<AdminPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 };
 

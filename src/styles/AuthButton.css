@@ -1,4 +1,4 @@
-.logout-button {
+.auth-button {
   position: fixed;
   top: 20px; /* Avstånd från toppen */
   left: 20px; /* Avstånd från vänster */
@@ -11,6 +11,6 @@
   font-weight: bold;
 }
 
-.logout-button:hover {
+.auth-button:hover {
   background-color: #c9312cb0; /* Mörkare röd vid hover */
 }

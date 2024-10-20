@@ -124,8 +124,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// POST /logout för att logga ut användaren och ta bort JWT-cookien
+app.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // Se till att sätta till true i produktion
+    sameSite: "Strict",
+  });
+
+  res.status(200).json({ message: "Utloggad och cookie raderad" });
+});
+
 // Middleware för att verifiera JWT och roller
 const verifyToken = (role) => (req, res, next) => {
+  console.log("Cookies på serversidan:", req.cookies);
+
   const token = req.cookies.token;
 
   if (!token) {
@@ -150,10 +163,6 @@ const verifyToken = (role) => (req, res, next) => {
 
 // GET /userinfo - returnera användarens information baserat på JWT-token
 app.get("/userinfo", verifyToken(), (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Ingen token angiven" });
-  }
-
   // Returnera användarinformation från JWT-tokenen
   res.json({
     username: req.user.username,

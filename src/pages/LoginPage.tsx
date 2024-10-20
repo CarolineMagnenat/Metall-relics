@@ -24,32 +24,10 @@ const LoginPage: React.FC = () => {
 
       if (response.ok) {
         setMessage("Inloggning lyckades!");
-
-        // hämtar användarinfo
-        const userInfoResponse = await fetch("http://localhost:3000/userinfo", {
-          method: "GET",
-          credentials: "include", // Inkludera cookies i begäran
-        });
-
-        if (userInfoResponse.ok) {
-          const userData = await userInfoResponse.json();
-
-          if (userData.access_level === 2) {
-            console.log("Omdirigerar till adminsidan");
-            navigate("/adminpage");
-          } else if (userData.access_level === 1) {
-            console.log("Omdirigerar till användarsidan");
-            navigate("/userpage");
-          } else {
-            console.log("Okänd access roll, omdirigerar till startsidan");
-            navigate("/");
-          }
-        } else {
-          setMessage("Misslyckades att hämta användarinfo");
-        }
+        navigate("/");
       } else {
         const data = await response.json();
-        setMessage(data.message || "Inloggning misslyckades");
+        setMessage(data.message);
       }
     } catch (error) {
       console.error("Något gick fel vid inloggning:", error);
