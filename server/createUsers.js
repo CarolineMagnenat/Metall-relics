@@ -18,8 +18,8 @@ async function createUsers() {
 
     // Skapa hashade lösenord med "bcrypt"
     const saltRounds = 10; // Antalet salt-rundor, 10 är ett standardvärde för bra säkerhet
-    const hashedAdminPassword = await hash("dittAdminLösenord", saltRounds);
-    const hashedUserPassword = await hash("dittAnvändarLösenord", saltRounds);
+    const hashedAdminPassword = await hash("123", saltRounds);
+    const hashedUserPassword = await hash("123", saltRounds);
 
     // SQL-fråga för att lägga till användarna i "logins"-tabellen
     const query = `
@@ -29,12 +29,7 @@ async function createUsers() {
     `;
 
     // Värden som sätts in i SQL-frågan ovan
-    const values = [
-      "adminuser",
-      hashedAdminPassword,
-      "regularuser",
-      hashedUserPassword,
-    ];
+    const values = ["carro", hashedAdminPassword, "benji", hashedUserPassword];
 
     // Kör SQL-frågan och sätt in användarna i databasen
     await conn.query(query, values);
