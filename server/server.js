@@ -106,7 +106,7 @@ app.post("/login", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: false,
       secure: false,
-      sameSite: "Lax", // eller 'Lax' baserat på dina behov
+      sameSite: "Lax",
       maxAge: 60 * 60 * 1000, // 1 timme
       path: "/",
     });
@@ -180,22 +180,28 @@ app.get("/adminpage", verifyToken(2), (req, res) => {
 
 // POST /reviews för att ta emot recensioner från användare och spara i databasen
 app.post("/reviews", async (req, res) => {
-  const { username, review } = req.body;
+  const { username, review, rating } = req.body;
+
+  if (!validator.isInt(rating, { min: 1, max: 5 })) {
+    return res.status(400).json({ message: "Ogiltig betyg" });
+  }
 
   if (!review) {
+    // TODO: validera recensionen senare
     return res.status(400).json({ message: "Recension krävs" });
   }
 
   try {
     const conn = await pool.getConnection();
 
+    // TODO - Sanera användarnamn för att undvika XSS
     const reviewer = username || "Anonym";
 
     // Infoga recensionen i databasen
-    await conn.query("INSERT INTO reviews (username, review) VALUES (?, ?)", [
-      reviewer,
-      review,
-    ]);
+    await conn.query(
+      "INSERT INTO reviews (username, review, rating) VALUES (?, ?, ?)",
+      [reviewer, review, rating]
+    );
 
     // Frigör anslutningen
     conn.release();

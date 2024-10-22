@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { Rating } from "react-simple-star-rating";
+// import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import Cookies from "js-cookie";
 import "../styles/ReviewPage.css";
 
 const ReviewPage: React.FC = () => {
-  const { isLoggedIn } = useAuth();
-  const [username, setUsername] = useState<string>("");
-  const [review, setReview] = useState<string>("");
+  const { isLoggedIn, user } = useAuth();
+  const [username, setUsername] = useState<string>("Anonym");
+  const [rating, setRating] = useState<number>(1);
+  const [reviewText, setReviewText] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -46,13 +51,17 @@ const ReviewPage: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, review }),
+        body: JSON.stringify({
+          username: username,
+          review: reviewText,
+          rating: String(rating),
+        }),
         credentials: "include",
       });
 
       if (response.ok) {
         setMessage("Recensionen skickades in! Tack för din feedback.");
-        setReview(""); // Nollställ formuläret efter inlämning
+        setReviewText("");
       } else {
         setMessage("Något gick fel, försök igen.");
       }
@@ -62,17 +71,27 @@ const ReviewPage: React.FC = () => {
     }
   };
 
+  const handleRating = (rate: number) => {
+    setRating(rate);
+  };
+
   return (
     <div className="review-page">
       <h1 className="review-title">Lämna en recension</h1>
-      {username && <p className="review-username">Inloggad som: {username}</p>}
+      {user?.username && (
+        <p className="review-username">Inloggad som: {user?.username}</p>
+      )}
       <form className="review-form" onSubmit={handleReviewSubmit}>
+        <div className="rating-section">
+          <label>Välj betyg:</label>
+          <Rating onClick={handleRating} />
+        </div>
         <div className="form-group">
           <label htmlFor="review">Din recension:</label>
           <textarea
             id="review"
-            value={review}
-            onChange={(e) => setReview(e.target.value)}
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
             required
             rows={5}
           />

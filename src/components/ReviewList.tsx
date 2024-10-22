@@ -7,13 +7,13 @@ interface Review {
   username: string;
   review: string;
   created_at: string;
+  rating: number;
 }
 
 const ReviewList: React.FC = () => {
   const { isLoggedIn, user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
 
-  // Hämta recensioner från backend
   useEffect(() => {
     console.log("Är användaren inloggad:", isLoggedIn);
     console.log("Användarinformation:", user);
@@ -59,12 +59,35 @@ const ReviewList: React.FC = () => {
     }
   };
 
+  // Funktion för att rendera stjärnor baserat på betyg
+  const renderStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars.push(
+          <div key={i} className="star filled">
+            ★
+          </div>
+        );
+      } else {
+        stars.push(
+          <div key={i} className="star">
+            ☆
+          </div>
+        );
+      }
+    }
+    return stars;
+  };
+
   return (
     <div className="reviews-container">
       <h2 className="reviews-title">Recensioner:</h2>
       <div className="reviews-list">
         {reviews.length === 0 ? (
-          <p>Det finns inga recensioner ännu.</p>
+          <div className="no-reviews-message">
+            Det finns inga recensioner ännu.
+          </div>
         ) : (
           reviews.map((r) => (
             <div key={r.id} className="review-item">
@@ -72,10 +95,12 @@ const ReviewList: React.FC = () => {
                 {r.username === "Anonymous" ? "Anonym" : r.username}
               </p>
               <p className="review-text">{r.review}</p>
-              <p className="review-date">
+
+              <div className="review-rating">{renderStars(r.rating)}</div>
+              <div className="review-date">
                 {new Date(r.created_at).toLocaleString()}
-              </p>
-              {/* Visa "Radera"-knappen om användaren är inloggad som administratör */}
+              </div>
+
               {isLoggedIn && user?.access_level === 2 && (
                 <button
                   className="delete-button"
