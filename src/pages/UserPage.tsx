@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton";
-import "../styles/PageLayout.css";
+//import "../styles/PageLayout.css";
 
 const UserPage: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);

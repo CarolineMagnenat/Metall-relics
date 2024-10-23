@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import RegisterPage from "./RegisterPage";
 import "../styles/LoginPage.css";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [showRegister, setShowRegister] = useState<boolean>(false); // För att hantera dropdown
 
   const { setIsLoggedIn, setUser } = useAuth();
   const navigate = useNavigate();
@@ -80,6 +82,15 @@ const LoginPage: React.FC = () => {
         </button>
       </form>
       {message && <p className="login-message">{message}</p>}
+
+      <button
+        className="toggle-register"
+        onClick={() => setShowRegister(!showRegister)}
+      >
+        {showRegister ? "Dölj registrering" : "Registrera dig"}
+      </button>
+
+      {showRegister && <RegisterPage />}
     </div>
   );
 };

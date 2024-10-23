@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Rating } from "react-simple-star-rating";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import Cookies from "js-cookie";
 import "../styles/ReviewPage.css";
@@ -12,7 +12,7 @@ const ReviewPage: React.FC = () => {
   const [reviewText, setReviewText] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -62,6 +62,10 @@ const ReviewPage: React.FC = () => {
       if (response.ok) {
         setMessage("Recensionen skickades in! Tack för din feedback.");
         setReviewText("");
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       } else {
         setMessage("Något gick fel, försök igen.");
       }
@@ -74,7 +78,7 @@ const ReviewPage: React.FC = () => {
   const handleRating = (rate: number) => {
     setRating(rate);
   };
-
+  // TODO skydda mot xss
   return (
     <div className="review-page">
       <h1 className="review-title">Lämna en recension</h1>

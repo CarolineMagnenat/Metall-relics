@@ -133,6 +133,45 @@ app.post("/logout", (req, res) => {
   res.status(200).json({ message: "Utloggad och cookie raderad" });
 });
 
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  // Validera användarnamn
+  if (!validator.isAlphanumeric(username)) {
+    return res.status(400).json({
+      message: "Användarnamn får endast innehålla bokstäver och siffror",
+    });
+  }
+
+  // Validera lösenordslängd
+  if (!validator.isLength(password, { min: 8 })) {
+    return res
+      .status(400)
+      .json({ message: "Lösenordet måste vara minst 8 tecken långt" });
+  }
+
+  // Sanera användarnamn och lösenord för att förhindra XSS
+  const sanitizedUsername = validator.escape(username);
+  const sanitizedPassword = validator.escape(password);
+
+  try {
+    // Hasha lösenordet innan det sparas i databasen
+    const hashedPassword = await bcrypt.hash(sanitizedPassword, 10);
+
+    // Spara användaren i databasen
+    const conn = await pool.getConnection();
+    const sql =
+      "INSERT INTO logins (username, password, access_level) VALUES (?, ?, ?)";
+    await conn.query(sql, [sanitizedUsername, hashedPassword, 1]);
+    conn.release();
+
+    res.status(201).json({ message: "Registreringen lyckades!" });
+  } catch (error) {
+    console.error("Fel vid registrering:", error);
+    res.status(500).json({ message: "Serverfel vid registrering" });
+  }
+});
+
 // Middleware för att verifiera JWT och roller
 const verifyToken = (role) => (req, res, next) => {
   // console.log("Cookies på serversidan:", req.cookies);
@@ -182,6 +221,7 @@ app.get("/adminpage", verifyToken(2), (req, res) => {
 app.post("/reviews", async (req, res) => {
   const { username, review, rating } = req.body;
 
+  // TODO behövs valitaor??
   if (!validator.isInt(rating, { min: 1, max: 5 })) {
     return res.status(400).json({ message: "Ogiltig betyg" });
   }

@@ -36,7 +36,7 @@ const ReviewList: React.FC = () => {
     };
 
     fetchReviews();
-  }, []);
+  }, [isLoggedIn, user]);
 
   // Ta bort recension
   const handleDeleteReview = async (id: number) => {
