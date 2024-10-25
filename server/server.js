@@ -67,6 +67,32 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET saknas i miljövariabler");
 }
 
+// Middleware för att verifiera JWT och roller
+const verifyToken = (role) => (req, res, next) => {
+  // console.log("Cookies på serversidan:", req.cookies);
+
+  const token = req.cookies.token;
+
+  if (!token) {
+    console.log("Ingen token hittades - blockad åtkomst");
+    return res.status(401).json({ message: "Ingen token angiven" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+
+    if (role !== undefined && req.user.access_level < role) {
+      return res.status(403).json({ message: "Åtkomst nekad" });
+    }
+
+    next();
+  } catch (err) {
+    console.log("Token fel - blockad");
+    return res.status(401).json({ message: "Ogiltig token" });
+  }
+};
+
 // POST /login för att autentisera användare och skapa en JWT-token
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -172,32 +198,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Middleware för att verifiera JWT och roller
-const verifyToken = (role) => (req, res, next) => {
-  // console.log("Cookies på serversidan:", req.cookies);
-
-  const token = req.cookies.token;
-
-  if (!token) {
-    console.log("Ingen token hittades - blockad åtkomst");
-    return res.status(401).json({ message: "Ingen token angiven" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-
-    if (role !== undefined && req.user.access_level < role) {
-      return res.status(403).json({ message: "Åtkomst nekad" });
-    }
-
-    next();
-  } catch (err) {
-    console.log("Token fel - blockad");
-    return res.status(401).json({ message: "Ogiltig token" });
-  }
-};
-
 // GET /userinfo - returnera användarens information baserat på JWT-token
 app.get("/userinfo", verifyToken(), (req, res) => {
   // Returnera användarinformation från JWT-tokenen
@@ -300,8 +300,8 @@ app.delete("/reviews/:id", verifyToken(2), async (req, res) => {
   }
 });
 
-// Starta servern på port 3000
-const PORT = process.env.PORT || 3000;
+// Starta servern på port 1337
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Servern kör på port ${PORT}`);
 });

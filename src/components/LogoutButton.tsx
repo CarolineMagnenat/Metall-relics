@@ -9,7 +9,7 @@ const LogoutButton: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:3000/logout", {
+      const response = await fetch("http://localhost:1337/logout", {
         method: "POST",
         credentials: "include",
       });

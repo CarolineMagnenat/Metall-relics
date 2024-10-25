@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch("http://localhost:1337/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
       if (response.ok) {
         setMessage("Inloggning lyckades!");
 
-        const userInfoResponse = await fetch("http://localhost:3000/userinfo", {
+        const userInfoResponse = await fetch("http://localhost:1337/userinfo", {
           method: "GET",
           credentials: "include",
         });
@@ -55,6 +55,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="login-page">
+      {showRegister && <RegisterPage />}
       <h1 className="login-title">Inloggning</h1>
       <form className="login-form" onSubmit={handleLogin}>
         <div className="form-group">
@@ -89,8 +90,6 @@ const LoginPage: React.FC = () => {
       >
         {showRegister ? "Dölj registrering" : "Registrera dig"}
       </button>
-
-      {showRegister && <RegisterPage />}
     </div>
   );
 };

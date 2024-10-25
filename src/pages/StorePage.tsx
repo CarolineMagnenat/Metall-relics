@@ -5,7 +5,7 @@ import ReviewList from "../components/ReviewList";
 import { useAuth } from "../context/useAuth";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-//import "../styles/PageLayout.css";
+import "../styles/PageLayout.css";
 
 const StorePage: React.FC = () => {
   const { isLoggedIn, setIsLoggedIn } = useAuth();

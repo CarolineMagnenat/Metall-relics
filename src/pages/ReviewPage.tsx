@@ -20,7 +20,7 @@ const ReviewPage: React.FC = () => {
 
       if (token) {
         try {
-          const response = await fetch("http://localhost:3000/userinfo", {
+          const response = await fetch("http://localhost:1337/userinfo", {
             method: "GET",
             credentials: "include",
           });
@@ -46,7 +46,7 @@ const ReviewPage: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/reviews", {
+      const response = await fetch("http://localhost:1337/reviews", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

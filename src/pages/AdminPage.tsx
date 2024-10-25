@@ -10,7 +10,7 @@ const AdminPage: React.FC = () => {
   useEffect(() => {
     const fetchAdminPage = async () => {
       try {
-        const response = await fetch("http://localhost:3000/adminpage", {
+        const response = await fetch("http://localhost:1337/adminpage", {
           method: "GET",
           credentials: "include", // Skicka cookies automatiskt
         });
