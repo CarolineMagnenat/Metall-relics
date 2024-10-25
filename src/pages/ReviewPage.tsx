@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Rating } from "react-simple-star-rating";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import HomeButton from "../components/HomeButton";
 import Cookies from "js-cookie";
 import "../styles/ReviewPage.css";
 
@@ -78,22 +79,28 @@ const ReviewPage: React.FC = () => {
   const handleRating = (rate: number) => {
     setRating(rate);
   };
-  // TODO skydda mot xss
+
   return (
     <div className="review-page">
-      <h1 className="review-title">Lämna en recension</h1>
-      {user?.username && (
-        <p className="review-username">Inloggad som: {user?.username}</p>
-      )}
+      <div className="review-header">
+        <HomeButton />
+        <h1 className="review-title">Lämna en recension</h1>
+        {user?.username && (
+          <p className="review-username">Inloggad som: {user?.username}</p>
+        )}
+      </div>
       <form className="review-form" onSubmit={handleReviewSubmit}>
         <div className="rating-section">
-          <label>Välj betyg:</label>
+          <label className="rating-label">Välj betyg:</label>
           <Rating onClick={handleRating} />
         </div>
         <div className="form-group">
-          <label htmlFor="review">Din recension:</label>
+          <label htmlFor="review" className="form-label">
+            Din recension:
+          </label>
           <textarea
             id="review"
+            className="review-textarea"
             value={reviewText}
             onChange={(e) => setReviewText(e.target.value)}
             required

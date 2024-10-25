@@ -1,4 +1,5 @@
-.auth-button {
+.auth-button,
+.go-home-button {
   position: fixed;
   top: 20px; /* Avstånd från toppen */
   left: 20px; /* Avstånd från vänster */
@@ -11,6 +12,7 @@
   font-weight: bold;
 }
 
-.auth-button:hover {
+.auth-button:hover,
+.go-home-button:hover {
   background-color: #c9312cb0; /* Mörkare röd vid hover */
 }

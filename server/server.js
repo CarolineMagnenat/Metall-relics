@@ -96,6 +96,7 @@ const verifyToken = (role) => (req, res, next) => {
 // POST /login för att autentisera användare och skapa en JWT-token
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
+  const ipAddress = req.ip; // Få användarens IP-adress för loggning
 
   try {
     // Sanera användarnamn för att undvika XSS
@@ -105,23 +106,79 @@ app.post("/login", async (req, res) => {
     const result = await conn.query("SELECT * FROM logins WHERE username = ?", [
       sanitizedUsername,
     ]);
+    const user = result[0];
     conn.release(); // Frigör anslutningen när vi är klara
 
-    const user = result[0];
-
     if (!user) {
+      // Logga misslyckat inloggningsförsök
+      const conn2 = await pool.getConnection();
+      await conn2.query(
+        "INSERT INTO login_attempts (username, success, ip_address, failed_attempts) VALUES (?, ?, ?, ?)",
+        [sanitizedUsername, false, ipAddress, 0]
+      );
+      conn2.release();
+
       return res
         .status(400)
         .json({ message: "Fel användarnamn eller lösenord" });
     }
 
+    // Kontrollera om kontot är låst
+    const now = new Date();
+    if (user.lock_until && new Date(user.lock_until) > now) {
+      const remainingTime = Math.ceil(
+        (new Date(user.lock_until) - now) / 1000 / 60
+      );
+      return res.status(403).json({
+        message: `Kontot är låst. Försök igen om ${remainingTime} minut(er).`,
+      });
+    }
+
+    // Kontrollera om lösenordet är giltigt
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      let failedAttempts = user.failed_attempts + 1;
+      let lockUntil = null;
+
+      // Om misslyckade försök är 3 eller fler, lås kontot i 2 minuter
+      if (failedAttempts >= 3) {
+        failedAttempts = 0; // Återställ misslyckade försök när kontot låses
+        lockUntil = new Date(now.getTime() + 2 * 60 * 1000); // Lås i 2 minuter
+      }
+
+      const conn3 = await pool.getConnection();
+      await conn3.query(
+        "UPDATE logins SET failed_attempts = ?, lock_until = ? WHERE username = ?",
+        [failedAttempts, lockUntil, sanitizedUsername]
+      );
+
+      // Logga misslyckat inloggningsförsök
+      await conn3.query(
+        "INSERT INTO login_attempts (username, success, ip_address, failed_attempts) VALUES (?, ?, ?, ?)",
+        [sanitizedUsername, false, ipAddress, failedAttempts]
+      );
+      conn3.release();
+
       return res
         .status(400)
         .json({ message: "Fel användarnamn eller lösenord" });
     }
 
+    // Inloggning lyckades, återställ misslyckade försök och låsning
+    const conn4 = await pool.getConnection();
+    await conn4.query(
+      "UPDATE logins SET failed_attempts = 0, lock_until = NULL WHERE username = ?",
+      [sanitizedUsername]
+    );
+
+    // Logga lyckat inloggningsförsök
+    await conn4.query(
+      "INSERT INTO login_attempts (username, success, ip_address, failed_attempts) VALUES (?, ?, ?, ?)",
+      [sanitizedUsername, true, ipAddress, 0]
+    );
+    conn4.release();
+
+    // Skapa JWT-token
     const token = jwt.sign(
       { username: user.username, access_level: user.access_level },
       JWT_SECRET,
@@ -132,7 +189,7 @@ app.post("/login", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: false,
       secure: false,
-      sameSite: "Lax",
+      sameSite: "Lax", // eller 'Strict' beroende på behov
       maxAge: 60 * 60 * 1000, // 1 timme
       path: "/",
     });

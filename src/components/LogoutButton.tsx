@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/AuthButton.css";
+import "../styles/Button.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 

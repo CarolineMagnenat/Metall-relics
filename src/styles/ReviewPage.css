@@ -1,36 +1,107 @@
 .review-page {
   max-width: 600px;
-  margin: auto;
+  margin: 0 auto;
+  margin-top: 20px;
   padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: "Arial, sans-serif";
 }
 
-.review-title {
-  font-size: 2rem;
+/* Header styles */
+.review-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 20px;
 }
 
+.review-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin: 10px 0;
+}
+
+.review-username {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Form styles */
 .review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Rating section styles */
+.rating-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.rating-label {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+/* Form group and label styles */
+.form-group {
   display: flex;
   flex-direction: column;
 }
 
-.form-group {
-  margin-bottom: 15px;
+.form-label {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
 }
 
-textarea {
-  width: 100%;
+/* Textarea styles */
+.review-textarea {
   padding: 10px;
-  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: vertical;
+  font-size: 14px;
 }
 
+.review-textarea:focus {
+  outline: none;
+  border-color: #007bff78;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Button styles */
 .review-button {
-  padding: 10px;
-  font-size: 1rem;
+  align-self: center;
+  padding: 10px 20px;
+  background-color: #007bff8e;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.review-button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.review-button:active {
+  background-color: #004494;
+}
+
+/* Message styles */
 .review-message {
-  margin-top: 15px;
-  font-weight: bold;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #e74c3c; /* Röd färg för felmeddelande */
+  text-align: center;
 }
