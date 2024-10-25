@@ -4,7 +4,7 @@ import zxcvbn from "zxcvbn";
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>(""); // Nytt fält för lösenordsbekräftelse
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
   const [passwordFeedback, setPasswordFeedback] = useState<string>("");

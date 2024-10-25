@@ -181,11 +181,26 @@ app.post("/register", async (req, res) => {
   const sanitizedPassword = validator.escape(password);
 
   try {
+    const conn = await pool.getConnection();
+
+    // Kontrollera om användarnamnet redan finns
+    const checkUser = await conn.query(
+      "SELECT username FROM logins WHERE username = ?",
+      [sanitizedUsername]
+    );
+
+    if (checkUser.length > 0) {
+      conn.release(); // Släpp anslutningen
+      return res
+        .status(400)
+        .json({ message: "Användarnamnet är redan upptaget" });
+    }
+
     // Hasha lösenordet innan det sparas i databasen
     const hashedPassword = await bcrypt.hash(sanitizedPassword, 10);
 
     // Spara användaren i databasen
-    const conn = await pool.getConnection();
+
     const sql =
       "INSERT INTO logins (username, password, access_level) VALUES (?, ?, ?)";
     await conn.query(sql, [sanitizedUsername, hashedPassword, 1]);
