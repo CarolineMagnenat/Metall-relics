@@ -47,11 +47,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         });
     };
 
-    let logoutTimer = setTimeout(logoutUser, 10000);
+    let logoutTimer = setTimeout(logoutUser, 300000); // 5 min
 
     const resetTimer = () => {
       clearTimeout(logoutTimer);
-      logoutTimer = setTimeout(logoutUser, 10000);
+      logoutTimer = setTimeout(logoutUser, 300000);
     };
 
     window.addEventListener("mousemove", resetTimer);

@@ -221,7 +221,8 @@ app.get("/adminpage", verifyToken(2), (req, res) => {
 app.post("/reviews", async (req, res) => {
   const { username, review, rating } = req.body;
 
-  // TODO behövs valitaor??
+  let sanitizedReview = validator.escape(review);
+
   if (!validator.isInt(rating, { min: 1, max: 5 })) {
     return res.status(400).json({ message: "Ogiltig betyg" });
   }
@@ -240,8 +241,11 @@ app.post("/reviews", async (req, res) => {
     // Infoga recensionen i databasen
     await conn.query(
       "INSERT INTO reviews (username, review, rating) VALUES (?, ?, ?)",
-      [reviewer, review, rating]
+      [reviewer, sanitizedReview, rating]
     );
+
+    console.log("review: ", review);
+    console.log("validator: ", sanitizedReview);
 
     // Frigör anslutningen
     conn.release();
