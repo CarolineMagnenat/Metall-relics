@@ -96,7 +96,12 @@ const verifyToken = (role) => (req, res, next) => {
 // POST /login för att autentisera användare och skapa en JWT-token
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const ipAddress = req.ip; // Få användarens IP-adress för loggning
+  const ipAddress = req.ip;
+  const userAgent = req.headers["user-agent"] || "Unknown";
+
+  console.log(userAgent);
+
+  // console.log(req);
 
   try {
     // Sanera användarnamn för att undvika XSS
@@ -113,8 +118,8 @@ app.post("/login", async (req, res) => {
       // Logga misslyckat inloggningsförsök
       const conn2 = await pool.getConnection();
       await conn2.query(
-        "INSERT INTO login_attempts (username, success, ip_address, failed_attempts) VALUES (?, ?, ?, ?)",
-        [sanitizedUsername, false, ipAddress, 0]
+        "INSERT INTO login_attempts (username, success, ip_address, failed_attempts, user_agent) VALUES (?, ?, ?, ?, ?)",
+        [sanitizedUsername, false, ipAddress, 0, userAgent]
       );
       conn2.release();
 
@@ -154,8 +159,8 @@ app.post("/login", async (req, res) => {
 
       // Logga misslyckat inloggningsförsök
       await conn3.query(
-        "INSERT INTO login_attempts (username, success, ip_address, failed_attempts) VALUES (?, ?, ?, ?)",
-        [sanitizedUsername, false, ipAddress, failedAttempts]
+        "INSERT INTO login_attempts (username, success, ip_address, failed_attempts, user_agent) VALUES (?, ?, ?, ?, ?)",
+        [sanitizedUsername, false, ipAddress, failedAttempts, userAgent]
       );
       conn3.release();
 
@@ -173,8 +178,8 @@ app.post("/login", async (req, res) => {
 
     // Logga lyckat inloggningsförsök
     await conn4.query(
-      "INSERT INTO login_attempts (username, success, ip_address, failed_attempts) VALUES (?, ?, ?, ?)",
-      [sanitizedUsername, true, ipAddress, 0]
+      "INSERT INTO login_attempts (username, success, ip_address, failed_attempts, user_agent) VALUES (?, ?, ?, ?, ?)",
+      [sanitizedUsername, true, ipAddress, 0, userAgent]
     );
     conn4.release();
 
@@ -287,6 +292,25 @@ app.get("/userpage", verifyToken(1), (req, res) => {
 // GET /adminpage - skyddad rutt för administratörer
 app.get("/adminpage", verifyToken(2), (req, res) => {
   res.json({ message: "Välkommen till adminsidan!" });
+});
+
+// GET /login-attempts - för att hämta alla inloggningsförsök från databasen (endast för admins)
+app.get("/login-attempts", verifyToken(2), async (req, res) => {
+  try {
+    // Hämta alla inloggningsförsök
+    const conn = await pool.getConnection();
+    const loginAttempts = await conn.query(
+      "SELECT * FROM login_attempts ORDER BY attempt_time DESC"
+    );
+    conn.release();
+
+    return res.status(200).json(loginAttempts);
+  } catch (error) {
+    console.error("Fel vid hämtning av inloggningsförsök:", error);
+    return res
+      .status(500)
+      .json({ message: "Serverfel vid hämtning av inloggningsförsök" });
+  }
 });
 
 // POST /reviews för att ta emot recensioner från användare och spara i databasen
