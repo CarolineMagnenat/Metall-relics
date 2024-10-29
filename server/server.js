@@ -517,13 +517,7 @@ app.get("/products/:productId/reviews", async (req, res) => {
     const reviews = await conn.query(sql, [productId]);
     conn.release();
 
-    if (reviews.length > 0) {
-      res.status(200).json(reviews);
-    } else {
-      res
-        .status(404)
-        .json({ message: "Inga recensioner hittades för denna produkt." });
-    }
+    res.status(200).json(reviews);
   } catch (error) {
     console.error("Fel vid hämtning av recensioner:", error);
     res.status(500).json({ message: "Serverfel vid hämtning av recensioner" });

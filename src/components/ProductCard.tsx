@@ -48,7 +48,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="product-details">
           <p className="product-description">{product.description}</p>
           <p className="product-stock">Lagersaldo: {product.stock} st</p>
-          <button className="show-reviews-button" onClick={onShowReviewsClick}>
+          <button className="review-button" onClick={onShowReviewsClick}>
             Visa recensioner
           </button>
           {isLoggedIn && (

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Rating } from "react-simple-star-rating";
 import { useAuth } from "../context/useAuth";
+import "../styles/ProductReviewForm.css";
 
 interface ProductReviewFormProps {
   productId: number;
@@ -9,7 +10,7 @@ interface ProductReviewFormProps {
 const ProductReviewForm: React.FC<ProductReviewFormProps> = ({ productId }) => {
   const { isLoggedIn, user } = useAuth();
   const [reviewText, setReviewText] = useState<string>("");
-  const [rating, setRating] = useState<number>(1);
+  const [rating, setRating] = useState<number>(0);
   const [message, setMessage] = useState<string>("");
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -29,7 +30,7 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({ productId }) => {
         credentials: "include",
         body: JSON.stringify({
           productId,
-          username: user?.username || "Anonym",
+          username: user?.username,
           review: reviewText,
           rating: rating,
         }),
@@ -38,7 +39,7 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({ productId }) => {
       if (response.ok) {
         setMessage("Recensionen skickades in! Tack för din feedback.");
         setReviewText("");
-        setRating(1);
+        setRating(0);
       } else {
         const data = await response.json();
         setMessage(data.message || "Något gick fel, försök igen.");
@@ -49,27 +50,43 @@ const ProductReviewForm: React.FC<ProductReviewFormProps> = ({ productId }) => {
     }
   };
 
+  const handleRatingChange = (rate: number) => {
+    setRating(rate);
+  };
+
   return (
     <div className="product-review-form">
-      <h3>Skriv en recension</h3>
+      <h3 className="form-title">Skriv en recension</h3>
       <form onSubmit={handleReviewSubmit}>
-        <div className="rating-section">
+        <div className="form-group">
           <label className="rating-label">Välj betyg:</label>
-          <Rating onClick={setRating} />
+          <Rating
+            onClick={handleRatingChange}
+            initialValue={rating}
+            emptyColor="#c0c0c0"
+            fillColor="#ffd700"
+            size={30}
+          />
         </div>
         <div className="form-group">
-          <label htmlFor="review">Din recension:</label>
+          <label htmlFor="review" className="review-label">
+            Din recension:
+          </label>
           <textarea
             id="review"
+            className="review-textarea"
             value={reviewText}
             onChange={(e) => setReviewText(e.target.value)}
             required
             rows={4}
+            placeholder="Skriv din recension här..."
           />
         </div>
-        <button type="submit">Skicka recension</button>
+        <button className="submit-button" type="submit">
+          Skicka recension
+        </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="review-message">{message}</p>}
     </div>
   );
 };

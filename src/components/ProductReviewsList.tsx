@@ -45,6 +45,14 @@ const ProductReviewsList: React.FC<ProductReviewsListProps> = ({
     fetchReviews();
   }, [productId]);
 
+  if (loading) {
+    return <p>Hämtar recensioner...</p>;
+  }
+
+  if (reviews.length === 0) {
+    return <p>Inga recensioner ännu</p>;
+  }
+
   return (
     <div className="product-reviews-list">
       <h2 className="product-reviews-title">Recensioner för denna produkt:</h2>
