@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/useAuth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import "../styles/ReviewList.css";
 
 interface Review {
@@ -91,6 +93,14 @@ const ReviewList: React.FC = () => {
         ) : (
           reviews.map((r) => (
             <div key={r.id} className="review-item">
+              {isLoggedIn && user?.access_level === 2 && (
+                <button
+                  className="delete-icon-button"
+                  onClick={() => handleDeleteReview(r.id)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              )}
               <p className="review-author">
                 {r.username === "Anonymous" ? "Anonym" : r.username}
               </p>
@@ -100,15 +110,6 @@ const ReviewList: React.FC = () => {
               <div className="review-date">
                 {new Date(r.created_at).toLocaleString()}
               </div>
-
-              {isLoggedIn && user?.access_level === 2 && (
-                <button
-                  className="delete-button"
-                  onClick={() => handleDeleteReview(r.id)}
-                >
-                  Radera
-                </button>
-              )}
             </div>
           ))
         )}
