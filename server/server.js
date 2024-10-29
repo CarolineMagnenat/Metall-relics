@@ -395,9 +395,38 @@ app.delete("/reviews/:id", verifyToken(2), async (req, res) => {
 });
 
 app.post("/add-product", verifyToken(2), async (req, res) => {
-  const { name, price, description, stock, imageUrl } = req.body;
+  let { name, price, description, stock, imageUrl } = req.body;
 
-  if (!name || !price || !description || !stock || !imageUrl) {
+  // Sanera textinmatningarna för att skydda mot XSS
+  const sanitizedName = validator.escape(name);
+  const sanitizedDescription = validator.escape(description);
+
+  // Validera imageUrl men undvik att förstöra sökvägen
+  if (!imageUrl.match(/\.(jpeg|jpg|gif|png)$/)) {
+    return res
+      .status(400)
+      .json({ message: "Ogiltig bildväg. Filen måste vara en bild." });
+  }
+
+  // Sanera men undvik att kodifiera `/`
+  imageUrl = imageUrl.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // Validera priset och lagersaldot
+  if (!validator.isDecimal(price.toString()) || price <= 0) {
+    return res
+      .status(400)
+      .json({ message: "Ogiltigt pris. Priset måste vara ett positivt tal." });
+  }
+
+  if (!validator.isInt(stock.toString(), { min: 0 })) {
+    return res.status(400).json({
+      message:
+        "Ogiltigt lagersaldo. Lagersaldot måste vara ett icke-negativt heltal.",
+    });
+  }
+
+  // Kontrollera att alla fält är korrekt ifyllda
+  if (!sanitizedName || !sanitizedDescription || !imageUrl) {
     return res.status(400).json({ message: "Alla fält måste fyllas i" });
   }
 
@@ -405,7 +434,13 @@ app.post("/add-product", verifyToken(2), async (req, res) => {
     const conn = await pool.getConnection();
     const sql =
       "INSERT INTO products (name, price, description, stock, imageUrl) VALUES (?, ?, ?, ?, ?)";
-    await conn.query(sql, [name, price, description, stock, imageUrl]);
+    await conn.query(sql, [
+      sanitizedName,
+      price,
+      sanitizedDescription,
+      stock,
+      imageUrl,
+    ]);
     conn.release();
 
     res.status(201).json({ message: "Produkten har lagts till!" });
@@ -425,6 +460,73 @@ app.get("/products", async (req, res) => {
   } catch (error) {
     console.error("Fel vid hämtning av produkter:", error);
     res.status(500).json({ message: "Serverfel vid hämtning av produkter" });
+  }
+});
+
+app.post("/add-product-review", verifyToken(1), async (req, res) => {
+  const { productId, username, review, rating } = req.body;
+
+  // Validera inmatningsdata
+  if (!productId || !validator.isInt(productId.toString())) {
+    return res.status(400).json({ message: "Ogiltigt produkt-ID" });
+  }
+
+  if (!validator.isInt(rating.toString(), { min: 1, max: 5 })) {
+    return res
+      .status(400)
+      .json({ message: "Ogiltigt betyg, måste vara mellan 1 och 5" });
+  }
+
+  if (!review || review.trim().length === 0) {
+    return res.status(400).json({ message: "Recension krävs" });
+  }
+
+  const sanitizedReview = validator.escape(review);
+  const sanitizedUsername = username || "Anonym";
+
+  try {
+    const conn = await pool.getConnection();
+
+    // Infoga recensionen i databasen
+    const sql =
+      "INSERT INTO product_reviews (product_id, username, review, rating) VALUES (?, ?, ?, ?)";
+    await conn.query(sql, [
+      productId,
+      sanitizedUsername,
+      sanitizedReview,
+      rating,
+    ]);
+
+    conn.release();
+
+    return res.status(201).json({ message: "Recensionen mottagen och sparad" });
+  } catch (error) {
+    console.error("Fel vid sparande av produktrecension:", error);
+    return res
+      .status(500)
+      .json({ message: "Serverfel vid sparande av produktrecension" });
+  }
+});
+
+app.get("/products/:productId/reviews", async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    const conn = await pool.getConnection();
+    const sql = "SELECT * FROM product_reviews WHERE product_id = ?";
+    const reviews = await conn.query(sql, [productId]);
+    conn.release();
+
+    if (reviews.length > 0) {
+      res.status(200).json(reviews);
+    } else {
+      res
+        .status(404)
+        .json({ message: "Inga recensioner hittades för denna produkt." });
+    }
+  } catch (error) {
+    console.error("Fel vid hämtning av recensioner:", error);
+    res.status(500).json({ message: "Serverfel vid hämtning av recensioner" });
   }
 });
 

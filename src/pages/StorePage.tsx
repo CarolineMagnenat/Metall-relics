@@ -44,14 +44,11 @@ const StorePage: React.FC = () => {
       )}
       <div className="page-content">
         <h1 className="page-title">HÄR ÄR AFFÄREN!</h1>
-        <button
-          className="review-button"
-          onClick={() => navigate("/review")} // Navigerar till ReviewPage
-        >
-          Lämna en recension
-        </button>
         <ProductList />
         <ReviewList />
+        <button className="review-button" onClick={() => navigate("/review")}>
+          Lämna en recension
+        </button>
       </div>
     </div>
   );

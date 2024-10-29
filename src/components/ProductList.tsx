@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
+import ProductCard from "./ProductCard";
+import ProductReviewsList from "./ProductReviewsList";
+import ProductReviewForm from "./ProductReviewForm";
+import Modal from "./Modal";
 import "../styles/ProductList.css";
 
 interface Product {
   id: number;
   name: string;
-  price: number;
+  price: number | string;
   description: string;
   stock: number;
   imageUrl: string;
 }
 
+type ModalContentType = "add-review" | "show-reviews";
+
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null
+  );
+  const [modalContentType, setModalContentType] =
+    useState<ModalContentType | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -34,30 +46,50 @@ const ProductList: React.FC = () => {
     fetchProducts();
   }, []);
 
+  const handleOpenModal = (
+    productId: number,
+    contentType: ModalContentType
+  ) => {
+    // Uppdaterar tillståndet så att modal och rätt produkt-id visas
+    setSelectedProductId(productId);
+    setModalContentType(contentType);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    // Stänger modalen och återställer produkt-id
+    setShowModal(false);
+    setSelectedProductId(null);
+    setModalContentType(null);
+  };
+
   return (
-    <div className="products-container">
+    <div className="product-list">
       <h2 className="products-title">Produkter:</h2>
-      <div className="products-list">
-        {products.length === 0 ? (
-          <p>Det finns inga produkter att visa.</p>
-        ) : (
-          products.map((product) => (
-            <div key={product.id} className="product-item">
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="product-image"
-              />
-              <h3 className="product-name">{product.name}</h3>
-              <p className="product-price">{product.price} kr</p>
-              <p className="product-description">{product.description}</p>
-              <p className="product-stock">
-                Lagersaldo: {product.stock > 0 ? product.stock : "Slut i lager"}
-              </p>
-            </div>
-          ))
-        )}
+      <div className="products-container">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onReviewClick={() => handleOpenModal(product.id, "add-review")}
+            onShowReviewsClick={() =>
+              handleOpenModal(product.id, "show-reviews")
+            }
+          />
+        ))}
       </div>
+
+      {/* Rendera Modal om showModal är true och en produkt är vald */}
+      {showModal && selectedProductId && (
+        <Modal onClose={handleCloseModal}>
+          {modalContentType === "add-review" && (
+            <ProductReviewForm productId={selectedProductId} />
+          )}
+          {modalContentType === "show-reviews" && (
+            <ProductReviewsList productId={selectedProductId} />
+          )}
+        </Modal>
+      )}
     </div>
   );
 };

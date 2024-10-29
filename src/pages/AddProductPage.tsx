@@ -27,7 +27,7 @@ const AddProductPage: React.FC = () => {
       price,
       description,
       stock,
-      imageUrl: process.env.PUBLIC_URL + "/assets/tshirt.jpeg",
+      imageUrl: "/assets/tshirt.jpeg",
     };
 
     try {

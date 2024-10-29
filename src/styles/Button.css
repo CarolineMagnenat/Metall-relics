@@ -1,8 +1,8 @@
 .auth-button,
 .go-home-button {
   position: fixed;
-  top: 20px; /* Avstånd från toppen */
-  left: 20px; /* Avstånd från vänster */
+  top: 50px; /* Avstånd från toppen */
+  left: 45px; /* Avstånd från vänster */
   background-color: #d9544f60; /* Röd färg för att indikera utloggning */
   color: white;
   border: none;

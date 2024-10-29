@@ -3,6 +3,7 @@
   padding: 20px;
   background-color: #f4f4f4;
   border-radius: 8px;
+  margin-bottom: 20px;
 }
 
 .reviews-title {
@@ -15,10 +16,7 @@
 .reviews-list {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(200px, 1fr)
-  ); /* Anpassa antal kolumner automatiskt */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   padding: 15px;
 }
 
