@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import LogoutButton from "../components/LogoutButton";
 import "../styles/login-attempts.css";
 
@@ -13,10 +14,13 @@ interface LoginAttempt {
 }
 
 const AdminPage: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const { isLoggedIn, user } = useAuth();
   const [message, setMessage] = useState<string>("");
   const [loginAttempts, setLoginAttempts] = useState<LoginAttempt[]>([]);
   const navigate = useNavigate();
+
+  console.log("ADMIN - Är användaren inloggad:", isLoggedIn);
+  console.log("ADMIN - Användarinformation:", user);
 
   useEffect(() => {
     const fetchAdminPage = async () => {
@@ -29,7 +33,6 @@ const AdminPage: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           setMessage(data.message);
-          setIsLoggedIn(true); // Inloggning lyckades
 
           // Hämta inloggningsförsök
           const loginAttemptsResponse = await fetch(
@@ -49,7 +52,8 @@ const AdminPage: React.FC = () => {
         } else {
           setMessage("Åtkomst nekad. Omdirigerar till inloggningssidan...");
           setTimeout(() => {
-            navigate("/");
+            console.log("oj oj coolt osv");
+            //navigate("/");
           }, 1500);
         }
       } catch (error) {
@@ -59,7 +63,7 @@ const AdminPage: React.FC = () => {
     };
 
     fetchAdminPage();
-  }, [navigate]);
+  }, [isLoggedIn, user]);
 
   // Funktion för att förenkla user agent-strängen
   const simplifyUserAgent = (userAgent: string) => {
@@ -87,9 +91,24 @@ const AdminPage: React.FC = () => {
         new Date(b.attempt_time).getTime() - new Date(a.attempt_time).getTime()
     )
     .slice(0, 100);
+
+  const handleAddProductClick = () => {
+    navigate("/add-product"); // Navigera till sidan där admin kan lägga till produkt
+  };
+
+  const handleHomeClick = () => {
+    navigate("/");
+  };
+
   return (
     <div className="page-layout">
       {isLoggedIn && <LogoutButton />}
+      <button className="add-product-button" onClick={handleAddProductClick}>
+        Lägg till ny produkt
+      </button>
+      <button onClick={handleHomeClick} className="home-button">
+        Till Hem
+      </button>
       <div className="page-content">
         <h1 className="page-title">Adminsida</h1>
         <p>{message}</p>

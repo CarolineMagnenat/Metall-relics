@@ -69,8 +69,6 @@ if (!JWT_SECRET) {
 
 // Middleware för att verifiera JWT och roller
 const verifyToken = (role) => (req, res, next) => {
-  // console.log("Cookies på serversidan:", req.cookies);
-
   const token = req.cookies.token;
 
   if (!token) {
@@ -98,10 +96,6 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const ipAddress = req.ip;
   const userAgent = req.headers["user-agent"] || "Unknown";
-
-  console.log(userAgent);
-
-  // console.log(req);
 
   try {
     // Sanera användarnamn för att undvika XSS
@@ -397,6 +391,40 @@ app.delete("/reviews/:id", verifyToken(2), async (req, res) => {
   } catch (error) {
     console.error("Serverfel vid radering av recension:", error);
     return res.status(500).json({ message: "Serverfel" });
+  }
+});
+
+app.post("/add-product", verifyToken(2), async (req, res) => {
+  const { name, price, description, stock, imageUrl } = req.body;
+
+  if (!name || !price || !description || !stock || !imageUrl) {
+    return res.status(400).json({ message: "Alla fält måste fyllas i" });
+  }
+
+  try {
+    const conn = await pool.getConnection();
+    const sql =
+      "INSERT INTO products (name, price, description, stock, imageUrl) VALUES (?, ?, ?, ?, ?)";
+    await conn.query(sql, [name, price, description, stock, imageUrl]);
+    conn.release();
+
+    res.status(201).json({ message: "Produkten har lagts till!" });
+  } catch (error) {
+    console.error("Fel vid tilläggning av produkt:", error);
+    res.status(500).json({ message: "Serverfel vid tilläggning av produkt" });
+  }
+});
+
+app.get("/products", async (req, res) => {
+  try {
+    const conn = await pool.getConnection();
+    const products = await conn.query("SELECT * FROM products");
+    conn.release();
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Fel vid hämtning av produkter:", error);
+    res.status(500).json({ message: "Serverfel vid hämtning av produkter" });
   }
 });
 

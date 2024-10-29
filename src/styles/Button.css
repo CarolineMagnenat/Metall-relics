@@ -16,3 +16,18 @@
 .go-home-button:hover {
   background-color: #c9312cb0; /* Mörkare röd vid hover */
 }
+
+.admin-button,
+.home-button {
+  background-color: #d9544f60;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-button:hover,
+.home-button:hover {
+  background-color: #c9312cb0;
+}

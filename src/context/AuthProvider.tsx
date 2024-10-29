@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
+import Cookies from "js-cookie";
 
 interface User {
   username: string;
@@ -23,23 +24,52 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = Cookies.get("token");
+      if (token) {
+        try {
+          const response = await fetch("http://localhost:1337/verify-token", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+            setUser(null);
+          }
+        } catch (error) {
+          console.error("Kunde inte verifiera token:", error);
+          setIsLoggedIn(false);
+          setUser(null);
+        }
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  useEffect(() => {
     if (!isLoggedIn) {
       return;
     }
 
     const logoutUser = () => {
-      localStorage.setItem("autoLogout", "true");
+      Cookies.remove("token");
 
       fetch("http://localhost:1337/logout", {
         method: "POST",
         credentials: "include", // Inkluderar cookies
       })
         .then(() => {
-          localStorage.removeItem("token");
-
           setIsLoggedIn(false);
           setUser(null);
-
           window.location.href = "/login";
         })
         .catch((error) => {
@@ -47,7 +77,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         });
     };
 
-    let logoutTimer = setTimeout(logoutUser, 300000); // 5 min
+    let logoutTimer = setTimeout(logoutUser, 300000); // 5 min = 300000
 
     const resetTimer = () => {
       clearTimeout(logoutTimer);
