@@ -42,8 +42,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         />
         <div className="product-details-info">
           <h2 className="product-details-name">{product.name}</h2>
-          <p className="product-details-price">{product.price}</p>
-          <p className="product-details-description">{product.description}</p>
+          <p className="product-details-price">{product.price} kr</p>
+          <p className="product-details-description">
+            <strong>Beskrivning:</strong> <br /> {product.description}
+          </p>
           <p className="product-details-stock">
             Lagersaldo: {product.stock} st
           </p>

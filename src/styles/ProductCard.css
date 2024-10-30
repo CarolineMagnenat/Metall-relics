@@ -1,4 +1,5 @@
 .product-item {
+  position: relative;
   background: #ffffff;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
@@ -14,15 +15,33 @@
   box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
 }
 
+.edit-product-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+  z-index: 10;
+}
+
+.edit-product-button:hover {
+  transform: scale(1.2);
+  color: #0056b3;
+}
+
 .product-image {
   width: 100%;
-  max-width: 200px; /* Gör bilderna större */
+  max-width: 200px;
   margin-bottom: 10px;
   transition: transform 0.3s ease;
 }
 
 .product-item:hover .product-image {
-  transform: scale(1.07); /* Gör att bilden zoomar in lite när man hovrar */
+  transform: scale(1.07);
 }
 
 .product-name {

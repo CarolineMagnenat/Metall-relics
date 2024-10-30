@@ -52,7 +52,6 @@ const AdminPage: React.FC = () => {
         } else {
           setMessage("Åtkomst nekad. Omdirigerar till inloggningssidan...");
           setTimeout(() => {
-            console.log("oj oj coolt osv");
             //navigate("/");
           }, 1500);
         }

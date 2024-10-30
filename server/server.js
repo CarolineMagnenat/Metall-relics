@@ -454,6 +454,43 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.put("/products/:productId", async (req, res) => {
+  const { productId } = req.params;
+  let { name, description, price, stock, image_url } = req.body;
+
+  // För att säkerställa att image_url inte uppdateras, ta bort det om det finns
+  if (image_url) {
+    console.warn("Försökte ändra image_url, ignorerar fältet.");
+    delete req.body.image_url;
+  }
+
+  try {
+    const conn = await pool.getConnection();
+    const query = `
+      UPDATE products 
+      SET name = ?, description = ?, price = ?, stock = ?
+      WHERE id = ?
+    `;
+    const result = await conn.query(query, [
+      name,
+      description,
+      price,
+      stock,
+      productId,
+    ]);
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Produkten hittades inte" });
+    }
+
+    return res.status(200).json({ message: "Produkten uppdaterades" });
+  } catch (error) {
+    console.error("Serverfel vid uppdatering av produkt:", error);
+    return res.status(500).json({ message: "Serverfel" });
+  }
+});
+
 app.post("/add-product-review", verifyToken(1), async (req, res) => {
   const { productId, username, review, rating } = req.body;
 
