@@ -74,11 +74,13 @@
   right: 10px;
   background: none;
   border: none;
-  color: #d9544f9b; /* Röd färg för att signalera radering */
+  color: #d9544f9b;
   cursor: pointer;
-  font-size: 1.2rem; /* Gör ikonen tydligare */
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
 }
 
 .delete-icon-button:hover {
-  color: #c9302c; /* Mörkare röd vid hover för att indikera att det är klickbart */
+  transform: scale(1.2);
+  color: #c9302c;
 }
