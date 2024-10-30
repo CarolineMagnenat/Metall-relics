@@ -24,8 +24,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       <h3 className="product-name">{product.name}</h3>
       <p className="product-price">
         {typeof product.price === "number"
-          ? product.price.toFixed(2)
-          : Number(product.price).toFixed(2)}{" "}
+          ? product.price
+          : Number(product.price)}{" "}
         kr
       </p>
     </div>

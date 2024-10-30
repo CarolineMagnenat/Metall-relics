@@ -91,7 +91,6 @@ const verifyToken = (role) => (req, res, next) => {
   }
 };
 
-// POST /login för att autentisera användare och skapa en JWT-token
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const ipAddress = req.ip;
@@ -204,7 +203,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// POST /logout för att logga ut användaren och ta bort JWT-cookien
 app.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -269,7 +267,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// GET /userinfo - returnera användarens information baserat på JWT-token
 app.get("/userinfo", verifyToken(), (req, res) => {
   // Returnera användarinformation från JWT-tokenen
   res.json({
@@ -278,17 +275,14 @@ app.get("/userinfo", verifyToken(), (req, res) => {
   });
 });
 
-// GET /userpage - skyddad rutt för användare och administratörer
 app.get("/userpage", verifyToken(1), (req, res) => {
   res.json({ message: "Välkommen till användarsidan!" });
 });
 
-// GET /adminpage - skyddad rutt för administratörer
 app.get("/adminpage", verifyToken(2), (req, res) => {
   res.json({ message: "Välkommen till adminsidan!" });
 });
 
-// GET /login-attempts - för att hämta alla inloggningsförsök från databasen (endast för admins)
 app.get("/login-attempts", verifyToken(2), async (req, res) => {
   try {
     // Hämta alla inloggningsförsök
@@ -307,7 +301,6 @@ app.get("/login-attempts", verifyToken(2), async (req, res) => {
   }
 });
 
-// POST /reviews för att ta emot recensioner från användare och spara i databasen
 app.post("/reviews", async (req, res) => {
   const { username, review, rating } = req.body;
 
@@ -349,7 +342,6 @@ app.post("/reviews", async (req, res) => {
   }
 });
 
-// GET /reviews för att hämta alla recensioner från databasen
 app.get("/reviews", async (req, res) => {
   try {
     // Skapa en anslutning till databasen
@@ -372,7 +364,6 @@ app.get("/reviews", async (req, res) => {
   }
 });
 
-// DELETE /reviews/:id för att ta bort en recension
 app.delete("/reviews/:id", verifyToken(2), async (req, res) => {
   const reviewId = req.params.id;
 
@@ -523,6 +514,33 @@ app.get("/products/:productId/reviews", async (req, res) => {
     res.status(500).json({ message: "Serverfel vid hämtning av recensioner" });
   }
 });
+
+// ta bort en review från en produkt
+app.delete(
+  "/products/:productId/reviews/:reviewId",
+  verifyToken(2),
+  async (req, res) => {
+    const { productId, reviewId } = req.params;
+
+    try {
+      const conn = await pool.getConnection();
+      const result = await conn.query(
+        "DELETE FROM product_reviews WHERE product_id = ? AND id = ?",
+        [productId, reviewId]
+      );
+      conn.release();
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Recension ej funnen" });
+      }
+
+      return res.status(200).json({ message: "Recension raderad" });
+    } catch (error) {
+      console.error("Serverfel vid radering av recension:", error);
+      return res.status(500).json({ message: "Serverfel" });
+    }
+  }
+);
 
 // Starta servern på port 1337
 const PORT = process.env.PORT;

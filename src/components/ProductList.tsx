@@ -7,7 +7,7 @@ import "../styles/ProductList.css";
 interface Product {
   id: number;
   name: string;
-  price: number | string;
+  price: number;
   description: string;
   stock: number;
   imageUrl: string;
