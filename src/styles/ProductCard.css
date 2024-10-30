@@ -1,9 +1,8 @@
-/* ProductCard.css */
 .product-item {
   background: #ffffff;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  width: 200px;
+  width: 220px;
   padding: 10px;
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -17,25 +16,30 @@
 
 .product-image {
   width: 100%;
-  height: auto;
-  border-radius: 10px;
+  max-width: 200px; /* Gör bilderna större */
+  margin-bottom: 10px;
+  transition: transform 0.3s ease;
+}
+
+.product-item:hover .product-image {
+  transform: scale(1.07); /* Gör att bilden zoomar in lite när man hovrar */
 }
 
 .product-name {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
 .product-price {
   color: #28a745;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   margin-bottom: 10px;
 }
 
 .product-details {
   margin-top: 15px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #333;
   transition: max-height 0.3s ease-in-out;
   overflow: hidden;

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
-import ProductReviewsList from "./ProductReviewsList";
-import ProductReviewForm from "./ProductReviewForm";
+import ProductDetails from "./ProductDetails";
 import Modal from "./Modal";
 import "../styles/ProductList.css";
 
@@ -14,16 +13,10 @@ interface Product {
   imageUrl: string;
 }
 
-type ModalContentType = "add-review" | "show-reviews";
-
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null
-  );
-  const [modalContentType, setModalContentType] =
-    useState<ModalContentType | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,21 +39,14 @@ const ProductList: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const handleOpenModal = (
-    productId: number,
-    contentType: ModalContentType
-  ) => {
-    // Uppdaterar tillståndet så att modal och rätt produkt-id visas
-    setSelectedProductId(productId);
-    setModalContentType(contentType);
+  const handleOpenModal = (product: Product) => {
+    setSelectedProduct(product);
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    // Stänger modalen och återställer produkt-id
     setShowModal(false);
-    setSelectedProductId(null);
-    setModalContentType(null);
+    setSelectedProduct(null);
   };
 
   return (
@@ -71,23 +57,14 @@ const ProductList: React.FC = () => {
           <ProductCard
             key={product.id}
             product={product}
-            onReviewClick={() => handleOpenModal(product.id, "add-review")}
-            onShowReviewsClick={() =>
-              handleOpenModal(product.id, "show-reviews")
-            }
+            onClick={() => handleOpenModal(product)}
           />
         ))}
       </div>
 
-      {/* Rendera Modal om showModal är true och en produkt är vald */}
-      {showModal && selectedProductId && (
+      {showModal && selectedProduct && (
         <Modal onClose={handleCloseModal}>
-          {modalContentType === "add-review" && (
-            <ProductReviewForm productId={selectedProductId} />
-          )}
-          {modalContentType === "show-reviews" && (
-            <ProductReviewsList productId={selectedProductId} />
-          )}
+          <ProductDetails product={selectedProduct} />
         </Modal>
       )}
     </div>

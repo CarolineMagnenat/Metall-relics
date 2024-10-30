@@ -55,7 +55,7 @@ const ProductReviewsList: React.FC<ProductReviewsListProps> = ({
 
   return (
     <div className="product-reviews-list">
-      <h2 className="product-reviews-title">Recensioner för denna produkt:</h2>
+      <h2 className="product-reviews-title">Recensioner:</h2>
       {loading ? (
         <p className="loading-message">Hämtar recensioner...</p>
       ) : reviews.length === 0 ? (
