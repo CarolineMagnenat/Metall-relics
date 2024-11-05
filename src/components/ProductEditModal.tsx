@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../styles/ProductEditModal.css";
 import { Product } from "../types/ProductTypes";
+import { useAuth } from "../context/useAuth";
 
 interface ProductEditModalProps {
   product: Product;
@@ -15,10 +16,12 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
   onClose,
   onSave,
 }) => {
+  const { user, isLoggedIn, getToken } = useAuth();
   const [name, setName] = useState(product.name);
   const [description, setDescription] = useState(product.description);
   const [price, setPrice] = useState(product.price);
   const [stock, setStock] = useState(product.stock);
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -31,6 +34,12 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
       stock,
     };
 
+    const token = getToken();
+    if (!token) {
+      console.error("Token saknas - kan inte uppdatera produkten");
+      return;
+    }
+
     try {
       const response = await fetch(
         `http://localhost:1337/products/${product.id}`,
@@ -38,6 +47,7 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(updatedProduct),
         }
@@ -51,6 +61,42 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
       }
     } catch (error) {
       console.error("Fel vid uppdatering av produkten:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isLoggedIn || !user) {
+      console.error("Användaren är inte inloggad - blockad åtkomst");
+      return;
+    }
+
+    const token = getToken();
+
+    if (!token) {
+      console.error("Ingen token tillgänglig, blockad åtkomst");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:1337/products/${product.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        onClose();
+        window.location.reload();
+      } else {
+        console.error("Misslyckades med att ta bort produkten");
+      }
+    } catch (error) {
+      console.error("Fel vid borttagning av produkten:", error);
     }
   };
 
@@ -97,6 +143,12 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
         </div>
 
         <div className="product-edit-modal-actions">
+          <button
+            className="product-delete-button"
+            onClick={() => setShowConfirmation(true)}
+          >
+            Ta bort produkt
+          </button>
           <button className="product-edit-save-button" onClick={handleSave}>
             Spara
           </button>
@@ -104,6 +156,23 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
             Avbryt
           </button>
         </div>
+        {showConfirmation && (
+          <div className="delete-confirmation-modal">
+            <p>Är du säker på att du vill ta bort produkten?</p>
+            <button
+              className="delete-confirmation-button"
+              onClick={handleDelete}
+            >
+              Ja, ta bort
+            </button>
+            <button
+              className="cancel-delete-button"
+              onClick={() => setShowConfirmation(false)}
+            >
+              Avbryt
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

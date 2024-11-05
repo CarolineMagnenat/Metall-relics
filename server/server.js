@@ -69,7 +69,20 @@ if (!JWT_SECRET) {
 
 // Middleware för att verifiera JWT och roller
 const verifyToken = (role) => (req, res, next) => {
-  const token = req.cookies.token;
+  let token;
+
+  // Försök att hämta token från Authorization header först
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.token) {
+    // Om ingen Authorization header finns, försök hämta från cookies
+    token = req.cookies.token;
+  }
+
+  console.log("Token som används:", token);
 
   if (!token) {
     console.log("Ingen token hittades - blockad åtkomst");
@@ -78,9 +91,11 @@ const verifyToken = (role) => (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log("Decoded Token Data:", decoded);
     req.user = decoded;
 
     if (role !== undefined && req.user.access_level < role) {
+      console.log("Åtkomst nekad - otillräcklig behörighet");
       return res.status(403).json({ message: "Åtkomst nekad" });
     }
 
@@ -186,7 +201,7 @@ app.post("/login", async (req, res) => {
     // Sätt JWT-token i HttpOnly, Secure cookie
     res.cookie("token", token, {
       httpOnly: false,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "Lax", // eller 'Strict' beroende på behov
       maxAge: 60 * 60 * 1000, // 1 timme
       path: "/",
@@ -205,7 +220,7 @@ app.post("/login", async (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("token", {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production", // Se till att sätta till true i produktion
     sameSite: "Lax",
   });
@@ -487,6 +502,26 @@ app.put("/products/:productId", async (req, res) => {
     return res.status(200).json({ message: "Produkten uppdaterades" });
   } catch (error) {
     console.error("Serverfel vid uppdatering av produkt:", error);
+    return res.status(500).json({ message: "Serverfel" });
+  }
+});
+
+app.delete("/products/:productId", verifyToken(2), async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    const conn = await pool.getConnection();
+    const query = `DELETE FROM products WHERE id = ?`;
+    const result = await conn.query(query, [productId]);
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Produkten hittades inte" });
+    }
+
+    return res.status(200).json({ message: "Produkten raderades" });
+  } catch (error) {
+    console.error("Serverfel vid radering av produkt:", error);
     return res.status(500).json({ message: "Serverfel" });
   }
 });

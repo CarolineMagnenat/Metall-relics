@@ -17,8 +17,8 @@ const ReviewList: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
-    console.log("Är användaren inloggad:", isLoggedIn);
-    console.log("Användarinformation:", user);
+    //console.log("Är användaren inloggad:", isLoggedIn);
+    //console.log("Användarinformation:", user);
 
     const fetchReviews = async () => {
       try {

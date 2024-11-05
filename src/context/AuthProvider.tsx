@@ -11,6 +11,7 @@ interface AuthContextType {
   setIsLoggedIn: (loggedIn: boolean) => void;
   user: User | null;
   setUser: (user: User | null) => void;
+  getToken: () => string | undefined;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -23,10 +24,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
 
+  const getToken = () => {
+    const token = Cookies.get("token");
+    console.log("AuthProvider - Hämtar token från Cookies: ", token); // Logga ut token varje gång getToken kallas
+    return token;
+  };
+
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const token = Cookies.get("token");
+      const token = getToken();
       if (token) {
+        console.log("AuthProvider: Token hittades i Cookies:", token);
         try {
           const response = await fetch("http://localhost:1337/verify-token", {
             method: "GET",
@@ -41,18 +49,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             setUser(userData);
             setIsLoggedIn(true);
           } else {
+            console.warn("AuthProvider: Token kunde inte verifieras");
             setIsLoggedIn(false);
             setUser(null);
           }
         } catch (error) {
-          console.error("Kunde inte verifiera token:", error);
+          console.error("AuthProvider: Kunde inte verifiera token:", error);
           setIsLoggedIn(false);
           setUser(null);
         }
+      } else {
+        console.log("AuthProvider: Ingen token hittades i Cookies.");
       }
     };
 
     checkAuthStatus();
+
+    // Lägg till en event listener för att reagera på förändringar i cookien
+    const handleStorageChange = () => {
+      checkAuthStatus(); // Verifiera token igen om något ändras
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -99,7 +121,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, [isLoggedIn]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, setIsLoggedIn, user, setUser, getToken }}
+    >
       {children}
     </AuthContext.Provider>
   );

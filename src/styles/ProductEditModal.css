@@ -74,3 +74,40 @@
   padding: 0.5rem 1rem;
   cursor: pointer;
 }
+
+.delete-confirmation-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.delete-confirmation-button {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.delete-confirmation-button:hover {
+  background-color: #c82333;
+}
+
+.cancel-delete-button {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.cancel-delete-button:hover {
+  background-color: #5a6268;
+}
