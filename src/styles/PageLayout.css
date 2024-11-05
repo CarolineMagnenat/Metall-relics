@@ -25,3 +25,22 @@
   margin-bottom: 20px;
   color: #333; /* Mörkgrå textfärg */
 }
+
+.cart-icon-container {
+  margin-right: 20px;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1500;
+}
+
+.cart-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.cart-button:hover {
+  color: #007bff; /* Ger en hover-effekt */
+}
