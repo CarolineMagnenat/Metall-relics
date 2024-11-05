@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../styles/ProductEditModal.css";
 import { Product } from "../types/ProductTypes";
 import { useAuth } from "../context/useAuth";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 interface ProductEditModalProps {
   product: Product;
@@ -101,80 +102,73 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
   };
 
   return (
-    <div className="product-edit-modal-backdrop" onClick={onClose}>
-      <div
-        className="product-edit-modal-content"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button className="product-edit-close-button" onClick={onClose}>
-          &times;
-        </button>
-        <h2>Redigera Produkt</h2>
-        <div className="product-edit-form-group">
-          <label>Namn</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div className="product-edit-form-group">
-          <label>Beskrivning</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <div className="product-edit-form-group">
-          <label>Pris (kr)</label>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-          />
-        </div>
-        <div className="product-edit-form-group">
-          <label>Lagersaldo</label>
-          <input
-            type="number"
-            value={stock}
-            onChange={(e) => setStock(Number(e.target.value))}
-          />
-        </div>
+    <>
+      <div className="product-edit-modal-backdrop" onClick={onClose}>
+        <div
+          className="product-edit-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button className="product-edit-close-button" onClick={onClose}>
+            &times;
+          </button>
+          <h2>Redigera Produkt</h2>
+          <div className="product-edit-form-group">
+            <label>Namn</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="product-edit-form-group">
+            <label>Beskrivning</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          <div className="product-edit-form-group">
+            <label>Pris (kr)</label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+            />
+          </div>
+          <div className="product-edit-form-group">
+            <label>Lagersaldo</label>
+            <input
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(Number(e.target.value))}
+            />
+          </div>
 
-        <div className="product-edit-modal-actions">
-          <button
-            className="product-delete-button"
-            onClick={() => setShowConfirmation(true)}
-          >
-            Ta bort produkt
-          </button>
-          <button className="product-edit-save-button" onClick={handleSave}>
-            Spara
-          </button>
-          <button className="product-edit-cancel-button" onClick={onClose}>
-            Avbryt
-          </button>
-        </div>
-        {showConfirmation && (
-          <div className="delete-confirmation-modal">
-            <p>Är du säker på att du vill ta bort produkten?</p>
+          <div className="product-edit-modal-actions">
             <button
-              className="delete-confirmation-button"
-              onClick={handleDelete}
+              className="product-delete-button"
+              onClick={() => setShowConfirmation(true)}
             >
-              Ja, ta bort
+              Ta bort produkt
             </button>
-            <button
-              className="cancel-delete-button"
-              onClick={() => setShowConfirmation(false)}
-            >
+            <button className="product-edit-save-button" onClick={handleSave}>
+              Spara
+            </button>
+            <button className="product-edit-cancel-button" onClick={onClose}>
               Avbryt
             </button>
           </div>
-        )}
+        </div>
       </div>
-    </div>
+      {showConfirmation && (
+        <ConfirmationModal
+          isOpen={showConfirmation}
+          onConfirm={handleDelete}
+          onClose={() => setShowConfirmation(false)}
+          message="Är du säker på att du vill ta bort produkten?"
+        />
+      )}
+    </>
   );
 };
 

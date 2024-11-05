@@ -18,6 +18,7 @@
   width: 90%;
   max-width: 500px;
   position: relative;
+  z-index: 1100;
 }
 
 .product-edit-close-button {
@@ -74,7 +75,7 @@
   padding: 0.5rem 1rem;
   cursor: pointer;
 }
-
+/* 
 .delete-confirmation-modal {
   position: fixed;
   top: 50%;
@@ -99,7 +100,7 @@
 .delete-confirmation-button:hover {
   background-color: #c82333;
 }
-
+*/
 .cancel-delete-button {
   background-color: #6c757d;
   color: #fff;

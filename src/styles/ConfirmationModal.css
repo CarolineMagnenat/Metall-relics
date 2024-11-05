@@ -1,0 +1,58 @@
+.confirmation-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* En halvgenomskinlig mörk bakgrund */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000000; /* Högt z-index för att den ska ligga över allt annat */
+}
+
+.confirmation-modal-content {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ger en lite mjukare skugga */
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  z-index: 1100000; /* Säkerställ att den ligger över bakgrunden */
+}
+
+.confirmation-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem; /* Extra marginal för att ge luft mellan text och knappar */
+}
+
+.confirm-button {
+  background-color: #dc3546cd; /* Röd för att indikera radering */
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-button:hover {
+  background-color: #c82333; /* Mörkare röd för hover-effekt */
+}
+
+.cancel-button {
+  background-color: #6c757dc7; /* Grå för att indikera att det är en avbryt-knapp */
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268; /* Mörkare grå för hover-effekt */
+}
