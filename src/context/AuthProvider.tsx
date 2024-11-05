@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const checkAuthStatus = async () => {
       const token = getToken();
       if (token) {
-        console.log("AuthProvider: Token hittades i Cookies:", token);
+        //console.log("AuthProvider: Token hittades i Cookies:", token);
         try {
           const response = await fetch("http://localhost:1337/verify-token", {
             method: "GET",
@@ -63,7 +63,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       }
     };
 
-    checkAuthStatus();
+    setTimeout(() => {
+      checkAuthStatus();
+    }, 300);
 
     // Lägg till en event listener för att reagera på förändringar i cookien
     const handleStorageChange = () => {

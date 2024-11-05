@@ -82,7 +82,7 @@ const verifyToken = (role) => (req, res, next) => {
     token = req.cookies.token;
   }
 
-  console.log("Token som används:", token);
+  //console.log("Token som används:", token);
 
   if (!token) {
     console.log("Ingen token hittades - blockad åtkomst");
@@ -91,7 +91,7 @@ const verifyToken = (role) => (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log("Decoded Token Data:", decoded);
+    // console.log("Decoded Token Data:", decoded);
     req.user = decoded;
 
     if (role !== undefined && req.user.access_level < role) {
@@ -105,6 +105,14 @@ const verifyToken = (role) => (req, res, next) => {
     return res.status(401).json({ message: "Ogiltig token" });
   }
 };
+
+app.get("/verify-token", verifyToken(), (req, res) => {
+  // Skicka tillbaka användarinfo baserat på den verifierade token
+  return res.status(200).json({
+    username: req.user.username,
+    access_level: req.user.access_level,
+  });
+});
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
