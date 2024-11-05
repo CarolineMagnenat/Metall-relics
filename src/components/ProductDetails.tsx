@@ -2,16 +2,8 @@ import React, { useRef, useState } from "react";
 import { useAuth } from "../context/useAuth";
 import ProductReviewsList from "./ProductReviewsList";
 import ProductReviewForm from "./ProductReviewForm";
+import { Product } from "../types/ProductTypes";
 import "../styles/ProductDetails.css";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number | string;
-  description: string;
-  stock: number;
-  imageUrl: string;
-}
 
 interface ProductDetailsProps {
   product: Product;
@@ -32,6 +24,24 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     }, 100);
   };
 
+  const handleAddToCart = () => {
+    // Skapa en objekt för varukorgen
+    const cartItem = {
+      ...product,
+      addedAt: new Date().getTime(), // Lägger till en timestamp när produkten läggs till
+    };
+    // Hämta varukorgen från localStorage
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // Lägg till den nya produkten i varukorgen
+    existingCart.push(cartItem);
+
+    // Spara uppdaterad varukorg i localStorage
+    localStorage.setItem("cart", JSON.stringify(existingCart));
+
+    console.log(`${product.name} har lagts till i varukorgen.`);
+  };
+
   return (
     <div className="product-details-container">
       <div className="product-details-header">
@@ -49,6 +59,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           <p className="product-details-stock">
             Lagersaldo: {product.stock} st
           </p>
+          <button className="add-to-cart-button" onClick={handleAddToCart}>
+            Lägg till i varukorgen
+          </button>
         </div>
       </div>
       <div className="product-details-reviews-section">
