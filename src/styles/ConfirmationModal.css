@@ -47,7 +47,7 @@
   background-color: #6c757dc7; /* Grå för att indikera att det är en avbryt-knapp */
   color: #fff;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
