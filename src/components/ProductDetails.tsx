@@ -5,6 +5,15 @@ import ProductReviewForm from "./ProductReviewForm";
 import { Product } from "../types/ProductTypes";
 import "../styles/ProductDetails.css";
 
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  addedAt: number;
+  quantity: number;
+}
+
 interface ProductDetailsProps {
   product: Product;
 }
@@ -25,16 +34,32 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   };
 
   const handleAddToCart = () => {
-    // Skapa en objekt för varukorgen
-    const cartItem = {
-      ...product,
-      addedAt: new Date().getTime(), // Lägger till en timestamp när produkten läggs till
-    };
-    // Hämta varukorgen från localStorage
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    // Hämta den existerande varukorgen från localStorage
+    const existingCart: CartItem[] = JSON.parse(
+      localStorage.getItem("cart") || "[]"
+    );
 
-    // Lägg till den nya produkten i varukorgen
-    existingCart.push(cartItem);
+    // Kontrollera om produkten redan finns i varukorgen
+    const existingItem = existingCart.find((item) => item.id === product.id);
+
+    if (existingItem) {
+      // Om produkten redan finns, öka kvantiteten
+      existingItem.quantity += 1;
+    } else {
+      // Annars lägg till produkten som nytt objekt
+      const newCartItem: CartItem = {
+        id: product.id,
+        name: product.name,
+        price:
+          typeof product.price === "string"
+            ? parseFloat(product.price)
+            : product.price,
+        stock: product.stock,
+        addedAt: new Date().getTime(),
+        quantity: 1, // Starta med kvantitet 1
+      };
+      existingCart.push(newCartItem);
+    }
 
     // Spara uppdaterad varukorg i localStorage
     localStorage.setItem("cart", JSON.stringify(existingCart));

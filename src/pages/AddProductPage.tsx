@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import "../styles/AddProductPage.css";
 
 const AddProductPage: React.FC = () => {
   const { isLoggedIn, user } = useAuth();
