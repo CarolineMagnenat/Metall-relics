@@ -19,9 +19,14 @@ interface ProductDetailsProps {
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const reviewFormRef = useRef<HTMLDivElement>(null);
+
+  if (!user) {
+    console.error("Ingen användare inloggad, kan inte visa varukorgen.");
+    return null;
+  }
 
   const handleToggleReviewForm = () => {
     setShowReviewForm((prev) => !prev);
@@ -35,36 +40,39 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
   const handleAddToCart = () => {
     // Hämta den existerande varukorgen från localStorage
-    const existingCart: CartItem[] = JSON.parse(
-      localStorage.getItem("cart") || "[]"
-    );
+    if (user) {
+      const cartKey = `cart_${user.username}`;
+      const existingCart: CartItem[] = JSON.parse(
+        localStorage.getItem(cartKey) || "[]"
+      );
 
-    // Kontrollera om produkten redan finns i varukorgen
-    const existingItem = existingCart.find((item) => item.id === product.id);
+      // Kontrollera om produkten redan finns i varukorgen
+      const existingItem = existingCart.find((item) => item.id === product.id);
 
-    if (existingItem) {
-      // Om produkten redan finns, öka kvantiteten
-      existingItem.quantity += 1;
-    } else {
-      // Annars lägg till produkten som nytt objekt
-      const newCartItem: CartItem = {
-        id: product.id,
-        name: product.name,
-        price:
-          typeof product.price === "string"
-            ? parseFloat(product.price)
-            : product.price,
-        stock: product.stock,
-        addedAt: new Date().getTime(),
-        quantity: 1, // Starta med kvantitet 1
-      };
-      existingCart.push(newCartItem);
+      if (existingItem) {
+        // Om produkten redan finns, öka kvantiteten
+        existingItem.quantity += 1;
+      } else {
+        // Annars lägg till produkten som nytt objekt
+        const newCartItem: CartItem = {
+          id: product.id,
+          name: product.name,
+          price:
+            typeof product.price === "string"
+              ? parseFloat(product.price)
+              : product.price,
+          stock: product.stock,
+          addedAt: new Date().getTime(),
+          quantity: 1, // Starta med kvantitet 1
+        };
+        existingCart.push(newCartItem);
+      }
+
+      // Spara uppdaterad varukorg i localStorage
+      localStorage.setItem(cartKey, JSON.stringify(existingCart));
+
+      console.log(`${product.name} har lagts till i varukorgen.`);
     }
-
-    // Spara uppdaterad varukorg i localStorage
-    localStorage.setItem("cart", JSON.stringify(existingCart));
-
-    console.log(`${product.name} har lagts till i varukorgen.`);
   };
 
   return (

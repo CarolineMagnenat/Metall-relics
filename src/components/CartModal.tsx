@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../context/useAuth";
 import "../styles/CartModal.css";
 
 interface CartItem {
@@ -16,32 +17,33 @@ interface CartModalProps {
 }
 
 const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Funktion för att hämta varor från localStorage
-  const fetchCartItems = () => {
-    const existingCart: CartItem[] = JSON.parse(
-      localStorage.getItem("cart") || "[]"
-    );
+  // Definiera fetchCartItems med useCallback så att den inte förändras vid varje render
+  const fetchCartItems = useCallback(() => {
+    if (user) {
+      const cartKey = `cart_${user.username}`;
+      const existingCart: CartItem[] = JSON.parse(
+        localStorage.getItem(cartKey) || "[]"
+      );
 
-    // Kontrollera och säkerställ att `price` är ett nummer
-    const parsedCart = existingCart.map((item) => ({
-      ...item,
-      price:
-        typeof item.price === "string" ? parseFloat(item.price) : item.price,
-    }));
+      const parsedCart = existingCart.map((item) => ({
+        ...item,
+        price:
+          typeof item.price === "string" ? parseFloat(item.price) : item.price,
+      }));
 
-    setCartItems(parsedCart);
-  };
+      setCartItems(parsedCart);
+    }
+  }, [user]); // Lägg till `user` som beroende eftersom det används i funktionen
 
-  // Använd useEffect för att hämta data när modalen öppnas
   useEffect(() => {
     if (isOpen) {
       fetchCartItems();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchCartItems]);
 
-  // Funktion för att räkna ut totalsumman
   const calculateTotalPrice = (): string => {
     const total = cartItems.reduce(
       (acc, item) => acc + item.price * item.quantity,
@@ -50,10 +52,12 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     return total.toFixed(2); // Formatera till två decimaler, t.ex. 123.45
   };
 
-  // Funktion för att rensa varukorgen från localStorage och tillståndet
   const clearCart = () => {
-    localStorage.removeItem("cart");
-    setCartItems([]);
+    if (user) {
+      const cartKey = `cart_${user.username}`;
+      localStorage.removeItem(cartKey);
+      setCartItems([]);
+    }
   };
 
   if (!isOpen) return null;
