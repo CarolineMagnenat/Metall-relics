@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "../context/useAuth";
-import ProductReviewsList from "./ProductReviewsList";
-import ProductReviewForm from "./ProductReviewForm";
-import { Product } from "../types/ProductTypes";
 import { updateProductStock, fetchProductStock } from "../api/productApi";
+import ProductInfo from "./ProductInfo";
+import ProductReviewsSection from "./ProductReviewsSection";
+import CartEmptiedPopup from "./CartEmptiedPopup";
+import { Product } from "../types/ProductTypes";
 import "../styles/ProductDetails.css";
 
 interface CartItem {
@@ -47,7 +48,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     fetchUpdatedProduct();
   }, [product.id]);
 
-  // Funktion för att tömma varukorgen och visa popup
   const clearCart = useCallback(() => {
     if (user) {
       console.log("Tömmer varukorgen...");
@@ -56,7 +56,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         localStorage.getItem(cartKey) || "[]"
       );
 
-      // Återställ lagret i databasen för alla objekt i varukorgen
       existingCart.forEach(async (item) => {
         try {
           await fetch("http://localhost:1337/restore-stock", {
@@ -74,20 +73,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         }
       });
 
-      // Rensa varukorgen från localStorage
       localStorage.removeItem(cartKey);
       console.log("Varukorgen har tömts automatiskt efter timeout.");
 
-      // Visa popup om att varukorgen tömdes
       setShowCartEmptiedMessage(true);
       console.log("Visar popup om att varukorgen tömdes.");
       setTimeout(() => {
         setShowCartEmptiedMessage(false);
-      }, 10000); // Popup-meddelandet visas i 5 sekunder
+      }, 10000); // Popup-meddelandet visas i 10 sekunder
     }
   }, [user]);
 
-  // useEffect för att kontrollera varukorgen och tömma den efter 20 sekunder
   useEffect(() => {
     if (user) {
       const cartKey = `cart_${user.username}`;
@@ -95,7 +91,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         localStorage.getItem(cartKey) || "[]"
       );
 
-      // Rensa varukorgen efter 20 sekunder om inget annat har lagts till
       if (existingCart.length > 0) {
         console.log(
           "Skapar timeout för att tömma varukorgen om 20 sekunder..."
@@ -106,7 +101,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         timeoutRef.current = setTimeout(() => {
           console.log("Timeout har gått ut, varukorgen töms...");
           clearCart();
-        }, 20000); // 20 sekunder för test (ändra till 5 minuter för produktion)
+        }, 20000);
       }
     }
   }, [user, clearCart]);
@@ -121,7 +116,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   };
 
   const handleAddToCart = async () => {
-    if (isUpdating) return; // Om vi redan uppdaterar, tillåt inte fler klick
+    if (isUpdating) return;
     setIsUpdating(true);
 
     if (user) {
@@ -145,7 +140,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         return;
       }
 
-      // Optimistisk uppdatering
       setProduct((prevProduct) => ({
         ...prevProduct,
         stock: prevProduct.stock - 1,
@@ -153,7 +147,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
       if (existingItem) {
         existingItem.quantity += 1;
-        existingItem.addedAt = new Date().getTime(); // Uppdatera tiden för när varan lades till
+        existingItem.addedAt = new Date().getTime();
       } else {
         const newCartItem: CartItem = {
           id: product.id,
@@ -169,21 +163,18 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       try {
         await updateProductStock(product.id, 1, token);
 
-        // Uppdatera localStorage efter att backend-uppdateringen lyckats
         localStorage.setItem(cartKey, JSON.stringify(existingCart));
         console.log(`${product.name} har lagts till i varukorgen.`);
 
-        // Starta om timeouten för att tömma varukorgen
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
         timeoutRef.current = setTimeout(() => {
           console.log("Timeout har gått ut, varukorgen töms...");
           clearCart();
-        }, 20000); // 20 sekunder för test
+        }, 20000);
       } catch (error) {
         console.error("Error updating stock:", error);
-        // Rollback om det blir ett serverfel
         setProduct((prevProduct) => ({
           ...prevProduct,
           stock: prevProduct.stock + 1,
@@ -198,57 +189,20 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   return (
     <div className="product-details-container">
       <div className="product-details-header">
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          className="product-details-image"
+        <ProductInfo
+          product={product}
+          isUpdating={isUpdating}
+          onAddToCart={handleAddToCart}
         />
-        <div className="product-details-info">
-          <h2 className="product-details-name">{product.name}</h2>
-          <p className="product-details-price">{product.price} kr</p>
-          <p className="product-details-description">
-            <strong>Beskrivning:</strong> <br /> {product.description}
-          </p>
-          <p
-            className="product-details-stock"
-            style={{ color: product.stock === 0 ? "red" : "black" }}
-          >
-            Lagersaldo: {product.stock} st
-          </p>
-          <button
-            className="add-to-cart-button"
-            onClick={handleAddToCart}
-            disabled={product.stock === 0 || isUpdating}
-          >
-            {product.stock > 0 ? "Lägg till i varukorgen" : "Slut i lager"}
-          </button>
-        </div>
       </div>
-      <div className="product-details-reviews-section">
-        <ProductReviewsList productId={product.id} />
-
-        {isLoggedIn && !showReviewForm && (
-          <button
-            className="product-details-review-button"
-            onClick={handleToggleReviewForm}
-          >
-            Lämna en recension
-          </button>
-        )}
-
-        {showReviewForm && (
-          <div ref={reviewFormRef} id="reviewForm">
-            <ProductReviewForm productId={product.id} />
-          </div>
-        )}
-      </div>
-
-      {/* Popup-meddelande som visas när varukorgen töms */}
-      {showCartEmptiedMessage && (
-        <div className="cart-emptied-popup">
-          <p>Varukorgen har tömts eftersom reservationstiden har gått ut.</p>
-        </div>
-      )}
+      <ProductReviewsSection
+        productId={product.id}
+        showReviewForm={showReviewForm}
+        isLoggedIn={isLoggedIn}
+        onToggleReviewForm={handleToggleReviewForm}
+        reviewFormRef={reviewFormRef}
+      />
+      <CartEmptiedPopup visible={showCartEmptiedMessage} />
     </div>
   );
 };

@@ -50,7 +50,7 @@ const StorePage: React.FC = () => {
         </button>
       )}
       <div className="page-content">
-        <h1 className="page-title">HÄR ÄR AFFÄREN!</h1>
+        <h1 className="page-title">ROLLING MERCH</h1>
         <ProductList />
         <ReviewList />
         <button className="review-button" onClick={() => navigate("/review")}>

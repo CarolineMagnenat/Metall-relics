@@ -72,13 +72,13 @@
 
 .cart-emptied-popup {
   position: fixed;
-  top: 20px; /* Placera den högre upp för synlighet */
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 15px;
   border-radius: 5px;
-  z-index: 9000; /* Se till att den renderas över alla andra element */
-  font-size: 1.2em; /* Gör texten lite större */
+  z-index: 9000;
+  font-size: 1.2em;
 }
