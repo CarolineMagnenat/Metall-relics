@@ -1,9 +1,9 @@
-import { updateProductStock, fetchProductStock } from "../api/productApi";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "../context/useAuth";
 import ProductReviewsList from "./ProductReviewsList";
 import ProductReviewForm from "./ProductReviewForm";
 import { Product } from "../types/ProductTypes";
+import { updateProductStock, fetchProductStock } from "../api/productApi";
 import "../styles/ProductDetails.css";
 
 interface CartItem {
@@ -27,6 +27,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   const reviewFormRef = useRef<HTMLDivElement>(null);
   const [product, setProduct] = useState(initialProduct);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showCartEmptiedMessage, setShowCartEmptiedMessage] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // useEffect för att hämta uppdaterat lagersaldo
   useEffect(() => {
@@ -44,6 +46,70 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
     fetchUpdatedProduct();
   }, [product.id]);
+
+  // Funktion för att tömma varukorgen och visa popup
+  const clearCart = useCallback(() => {
+    if (user) {
+      console.log("Tömmer varukorgen...");
+      const cartKey = `cart_${user.username}`;
+      const existingCart: CartItem[] = JSON.parse(
+        localStorage.getItem(cartKey) || "[]"
+      );
+
+      // Återställ lagret i databasen för alla objekt i varukorgen
+      existingCart.forEach(async (item) => {
+        try {
+          await fetch("http://localhost:1337/restore-stock", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: item.id,
+              quantity: item.quantity,
+            }),
+          });
+        } catch (error) {
+          console.error("Error restoring stock:", error);
+        }
+      });
+
+      // Rensa varukorgen från localStorage
+      localStorage.removeItem(cartKey);
+      console.log("Varukorgen har tömts automatiskt efter timeout.");
+
+      // Visa popup om att varukorgen tömdes
+      setShowCartEmptiedMessage(true);
+      console.log("Visar popup om att varukorgen tömdes.");
+      setTimeout(() => {
+        setShowCartEmptiedMessage(false);
+      }, 10000); // Popup-meddelandet visas i 5 sekunder
+    }
+  }, [user]);
+
+  // useEffect för att kontrollera varukorgen och tömma den efter 20 sekunder
+  useEffect(() => {
+    if (user) {
+      const cartKey = `cart_${user.username}`;
+      const existingCart: CartItem[] = JSON.parse(
+        localStorage.getItem(cartKey) || "[]"
+      );
+
+      // Rensa varukorgen efter 20 sekunder om inget annat har lagts till
+      if (existingCart.length > 0) {
+        console.log(
+          "Skapar timeout för att tömma varukorgen om 20 sekunder..."
+        );
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
+          console.log("Timeout har gått ut, varukorgen töms...");
+          clearCart();
+        }, 20000); // 20 sekunder för test (ändra till 5 minuter för produktion)
+      }
+    }
+  }, [user, clearCart]);
 
   const handleToggleReviewForm = () => {
     setShowReviewForm((prev) => !prev);
@@ -87,6 +153,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
       if (existingItem) {
         existingItem.quantity += 1;
+        existingItem.addedAt = new Date().getTime(); // Uppdatera tiden för när varan lades till
       } else {
         const newCartItem: CartItem = {
           id: product.id,
@@ -105,6 +172,15 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         // Uppdatera localStorage efter att backend-uppdateringen lyckats
         localStorage.setItem(cartKey, JSON.stringify(existingCart));
         console.log(`${product.name} har lagts till i varukorgen.`);
+
+        // Starta om timeouten för att tömma varukorgen
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
+          console.log("Timeout har gått ut, varukorgen töms...");
+          clearCart();
+        }, 20000); // 20 sekunder för test
       } catch (error) {
         console.error("Error updating stock:", error);
         // Rollback om det blir ett serverfel
@@ -166,6 +242,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
           </div>
         )}
       </div>
+
+      {/* Popup-meddelande som visas när varukorgen töms */}
+      {showCartEmptiedMessage && (
+        <div className="cart-emptied-popup">
+          <p>Varukorgen har tömts eftersom reservationstiden har gått ut.</p>
+        </div>
+      )}
     </div>
   );
 };
