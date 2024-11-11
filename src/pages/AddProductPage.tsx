@@ -55,49 +55,61 @@ const AddProductPage: React.FC = () => {
   };
 
   return (
-    <div className="add-product-page">
-      <h1 className="page-title">Lägg till ny produkt</h1>
-      <form className="add-product-form" onSubmit={handleAddProduct}>
-        <div className="form-group">
-          <label htmlFor="product-name">Produktnamn:</label>
+    <div className="add-product-page-container">
+      <h1 className="add-product-page-title">Lägg till ny produkt</h1>
+      <form className="add-product-form-container" onSubmit={handleAddProduct}>
+        <div className="add-product-form-group">
+          <label htmlFor="product-name" className="add-product-label">
+            Produktnamn:
+          </label>
           <input
             type="text"
             id="product-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            className="add-product-input"
             required
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="product-price">Pris:</label>
+        <div className="add-product-form-group">
+          <label htmlFor="product-price" className="add-product-label">
+            Pris:
+          </label>
           <input
             type="number"
             id="product-price"
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
+            className="add-product-input"
             required
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="product-description">Beskrivning:</label>
+        <div className="add-product-form-group">
+          <label htmlFor="product-description" className="add-product-label">
+            Beskrivning:
+          </label>
           <textarea
             id="product-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            className="add-product-textarea"
             required
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="product-stock">Lagersaldo:</label>
+        <div className="add-product-form-group">
+          <label htmlFor="product-stock" className="add-product-label">
+            Lagersaldo:
+          </label>
           <input
             type="number"
             id="product-stock"
             value={stock}
             onChange={(e) => setStock(Number(e.target.value))}
+            className="add-product-input"
             required
           />
         </div>
-        <button className="add-product-button" type="submit">
+        <button className="add-product-submit-button" type="submit">
           Skapa produkt
         </button>
       </form>

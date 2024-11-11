@@ -92,9 +92,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       );
 
       if (existingCart.length > 0) {
-        console.log(
-          "Skapar timeout för att tömma varukorgen om 20 sekunder..."
-        );
+        console.log("Skapar timeout för att tömma varukorgen om 5 minuter...");
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }

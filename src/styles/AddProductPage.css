@@ -1,19 +1,76 @@
-.add-product-page {
+/* AddProductPage.css */
+
+.add-product-page-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.add-product-page-title {
+  text-align: center;
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.add-product-form-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-product-form-group {
+  margin-bottom: 15px;
+}
+
+.add-product-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.add-product-input,
+.add-product-textarea {
   width: 100%;
-  background-color: rgba(255, 0, 0, 0.395);
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
-/* .page-title {
-  background-color: rgba(0, 255, 255, 0.404);
+.add-product-input:focus,
+.add-product-textarea:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
-.add-product-form {
-  background-color: rgba(255, 255, 0, 0.355);
+.add-product-textarea {
+  height: 100px;
+  resize: vertical;
 }
 
-.form-group {
-  background-color: rgba(0, 128, 0, 0.465);
+.add-product-submit-button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.2em;
+  text-align: center;
+  transition: background-color 0.3s ease;
 }
 
-.add-product-button {
-} */
+.add-product-submit-button:hover {
+  background-color: #0056b3;
+}
+
+.add-product-submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
