@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import { updateProductStock, fetchProductStock } from "../api/productApi";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/useAuth";
 import ProductReviewsList from "./ProductReviewsList";
 import ProductReviewForm from "./ProductReviewForm";
@@ -18,60 +19,103 @@ interface ProductDetailsProps {
   product: Product;
 }
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
-  const { isLoggedIn, user } = useAuth();
+const ProductDetails: React.FC<ProductDetailsProps> = ({
+  product: initialProduct,
+}) => {
+  const { isLoggedIn, user, getToken } = useAuth();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const reviewFormRef = useRef<HTMLDivElement>(null);
+  const [product, setProduct] = useState(initialProduct);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  if (!user) {
-    console.error("Ingen användare inloggad, kan inte visa varukorgen.");
-    return null;
-  }
+  // useEffect för att hämta uppdaterat lagersaldo
+  useEffect(() => {
+    const fetchUpdatedProduct = async () => {
+      try {
+        const { stock } = await fetchProductStock(product.id);
+        setProduct((prevProduct) => ({
+          ...prevProduct,
+          stock,
+        }));
+      } catch (error) {
+        console.error("Fel vid hämtning av uppdaterad lagerstatus:", error);
+      }
+    };
+
+    fetchUpdatedProduct();
+  }, [product.id]);
 
   const handleToggleReviewForm = () => {
     setShowReviewForm((prev) => !prev);
     setTimeout(() => {
       if (reviewFormRef.current) {
-        // Skrolla till recensionformuläret inom popupen
         reviewFormRef.current.scrollIntoView({ behavior: "smooth" });
       }
     }, 100);
   };
 
-  const handleAddToCart = () => {
-    // Hämta den existerande varukorgen från localStorage
+  const handleAddToCart = async () => {
+    if (isUpdating) return; // Om vi redan uppdaterar, tillåt inte fler klick
+    setIsUpdating(true);
+
     if (user) {
       const cartKey = `cart_${user.username}`;
       const existingCart: CartItem[] = JSON.parse(
         localStorage.getItem(cartKey) || "[]"
       );
 
-      // Kontrollera om produkten redan finns i varukorgen
       const existingItem = existingCart.find((item) => item.id === product.id);
+      const token = getToken();
+
+      if (!token) {
+        console.error("Ingen token hittades, användaren är inte autentiserad.");
+        setIsUpdating(false);
+        return;
+      }
+
+      if (product.stock <= 0) {
+        console.log("Produkten är slut i lager.");
+        setIsUpdating(false);
+        return;
+      }
+
+      // Optimistisk uppdatering
+      setProduct((prevProduct) => ({
+        ...prevProduct,
+        stock: prevProduct.stock - 1,
+      }));
 
       if (existingItem) {
-        // Om produkten redan finns, öka kvantiteten
         existingItem.quantity += 1;
       } else {
-        // Annars lägg till produkten som nytt objekt
         const newCartItem: CartItem = {
           id: product.id,
           name: product.name,
-          price:
-            typeof product.price === "string"
-              ? parseFloat(product.price)
-              : product.price,
+          price: parseFloat(product.price.toString()),
           stock: product.stock,
           addedAt: new Date().getTime(),
-          quantity: 1, // Starta med kvantitet 1
+          quantity: 1,
         };
         existingCart.push(newCartItem);
       }
 
-      // Spara uppdaterad varukorg i localStorage
-      localStorage.setItem(cartKey, JSON.stringify(existingCart));
+      try {
+        await updateProductStock(product.id, 1, token);
 
-      console.log(`${product.name} har lagts till i varukorgen.`);
+        // Uppdatera localStorage efter att backend-uppdateringen lyckats
+        localStorage.setItem(cartKey, JSON.stringify(existingCart));
+        console.log(`${product.name} har lagts till i varukorgen.`);
+      } catch (error) {
+        console.error("Error updating stock:", error);
+        // Rollback om det blir ett serverfel
+        setProduct((prevProduct) => ({
+          ...prevProduct,
+          stock: prevProduct.stock + 1,
+        }));
+        alert("Det gick inte att uppdatera lagret. Försök igen.");
+      } finally {
+        setIsUpdating(false);
+      }
     }
   };
 
@@ -89,11 +133,18 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           <p className="product-details-description">
             <strong>Beskrivning:</strong> <br /> {product.description}
           </p>
-          <p className="product-details-stock">
+          <p
+            className="product-details-stock"
+            style={{ color: product.stock === 0 ? "red" : "black" }}
+          >
             Lagersaldo: {product.stock} st
           </p>
-          <button className="add-to-cart-button" onClick={handleAddToCart}>
-            Lägg till i varukorgen
+          <button
+            className="add-to-cart-button"
+            onClick={handleAddToCart}
+            disabled={product.stock === 0 || isUpdating}
+          >
+            {product.stock > 0 ? "Lägg till i varukorgen" : "Slut i lager"}
           </button>
         </div>
       </div>

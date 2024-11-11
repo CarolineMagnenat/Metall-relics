@@ -122,9 +122,9 @@ const AdminPage: React.FC = () => {
               </div>
               <div className="login-attempt-cell">
                 {attempt.success ? (
-                  <span className="success-text">Ja</span>
+                  <span className="success-text">Lyckades</span>
                 ) : (
-                  <span className="error-text">Nej</span>
+                  <span className="error-text">Misslyckades</span>
                 )}
               </div>
               <div className="login-attempt-cell">{attempt.ip_address}</div>

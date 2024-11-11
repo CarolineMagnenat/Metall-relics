@@ -36,7 +36,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
 
       setCartItems(parsedCart);
     }
-  }, [user]); // Lägg till `user` som beroende eftersom det används i funktionen
+  }, [user]);
 
   useEffect(() => {
     if (isOpen) {
@@ -52,9 +52,36 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     return total.toFixed(2); // Formatera till två decimaler, t.ex. 123.45
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
     if (user) {
       const cartKey = `cart_${user.username}`;
+      const existingCart: CartItem[] = JSON.parse(
+        localStorage.getItem(cartKey) || "[]"
+      );
+
+      // Återställ lagret för alla varor i varukorgen
+      for (const item of existingCart) {
+        try {
+          const response = await fetch("http://localhost:1337/restore-stock", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: item.id,
+              quantity: item.quantity,
+            }),
+          });
+
+          if (!response.ok) {
+            console.error("Failed to restore stock for item:", item.name);
+          }
+        } catch (error) {
+          console.error("Error restoring stock:", error);
+        }
+      }
+
+      // Rensa varukorgen från localStorage
       localStorage.removeItem(cartKey);
       setCartItems([]);
     }

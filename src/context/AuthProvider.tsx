@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const getToken = () => {
     const token = Cookies.get("token");
-    console.log("AuthProvider - Hämtar token från Cookies: ", token); // Logga ut token varje gång getToken kallas
+    // console.log("AuthProvider - Hämtar token från Cookies: ", token); // Logga ut token varje gång getToken kallas
     return token;
   };
 

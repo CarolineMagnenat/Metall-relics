@@ -622,6 +622,137 @@ app.delete(
   }
 );
 
+// app.post("/update-stock", verifyToken(), async (req, res) => {
+//   const { productId, quantity } = req.body;
+
+//   if (!productId || quantity === undefined || quantity < 0) {
+//     return res.status(400).json({ message: "Ogiltiga inmatningsdata" });
+//   }
+
+//   try {
+//     // Kontrollera att inmatningarna är korrekta
+//     console.log(
+//       `Uppdaterar lagersaldo: produktId=${productId}, quantity=${quantity}`
+//     );
+
+//     const conn = await pool.getConnection();
+//     const [product] = await conn.query(
+//       "SELECT stock FROM products WHERE id = ?",
+//       [productId]
+//     );
+
+//     if (!product) {
+//       console.error("Produkten hittades inte");
+//       return res.status(404).json({ message: "Produkten hittades inte" });
+//     }
+
+//     if (product.stock < quantity) {
+//       console.error(
+//         "Lagersaldo räcker inte till. Tillgängligt:",
+//         product.stock
+//       );
+//       return res.status(400).json({ message: "Lagersaldo räcker inte till" });
+//     }
+
+//     // Uppdatera lagersaldot
+//     console.log(
+//       `Försöker uppdatera lagersaldo för produktId=${productId}, nuvarande lager=${product.stock}, quantity=${quantity}`
+//     );
+//     const result = await conn.query(
+//       "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?",
+//       [quantity, productId, quantity]
+//     );
+
+//     console.log(`Uppdateringsresultat: ${result.affectedRows} rader påverkas.`);
+
+//     conn.release();
+
+//     if (result.affectedRows === 0) {
+//       console.error("Inget lager uppdaterades, troligen otillräckligt saldo.");
+//       return res.status(400).json({ message: "Lagersaldo räcker inte till" });
+//     }
+
+//     console.log(`Lagersaldo för produktId=${productId} har uppdaterats.`);
+//     return res.status(200).json({ message: "Lagersaldo uppdaterat" });
+//   } catch (error) {
+//     console.error("Fel vid uppdatering av lager:", error);
+//     return res
+//       .status(500)
+//       .json({ message: "Serverfel vid uppdatering av lager" });
+//   }
+// });
+
+app.post("/update-stock", verifyToken(), async (req, res) => {
+  const { productId, quantity } = req.body;
+
+  if (!productId || quantity === undefined || quantity <= 0) {
+    return res.status(400).json({ message: "Ogiltiga inmatningsdata" });
+  }
+
+  try {
+    const conn = await pool.getConnection();
+
+    // Minska lagersaldot
+    const result = await conn.query(
+      "UPDATE products SET stock = GREATEST(stock - ?, 0) WHERE id = ? AND stock >= ?",
+      [quantity, productId, quantity]
+    );
+
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ message: "Lagersaldo räcker inte till" });
+    }
+
+    return res.status(200).json({ message: "Lagersaldo uppdaterat" });
+  } catch (error) {
+    console.error("Fel vid uppdatering av lager:", error);
+    return res
+      .status(500)
+      .json({ message: "Serverfel vid uppdatering av lager" });
+  }
+});
+
+app.get("/product-stock/:productId", async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    const conn = await pool.getConnection();
+    const [product] = await conn.query(
+      "SELECT stock FROM products WHERE id = ?",
+      [productId]
+    );
+    conn.release();
+
+    if (!product) {
+      return res.status(404).json({ message: "Produkten hittades inte" });
+    }
+
+    return res.status(200).json({ stock: product.stock });
+  } catch (error) {
+    console.error("Fel vid hämtning av lagerstatus:", error);
+    return res
+      .status(500)
+      .json({ message: "Serverfel vid hämtning av lagerstatus" });
+  }
+});
+
+app.post("/restore-stock", async (req, res) => {
+  const { productId, quantity } = req.body;
+
+  try {
+    const conn = await pool.getConnection();
+    const query = "UPDATE products SET stock = stock + ? WHERE id = ?";
+    await conn.query(query, [quantity, productId]);
+
+    res.status(200).send({ message: "Stock restored successfully" });
+    conn.release();
+  } catch (error) {
+    console.error("Error restoring stock:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
 // Starta servern på port 1337
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
