@@ -125,6 +125,19 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         localStorage.getItem(cartKey) || "[]"
       );
 
+      // Beräkna det totala antalet produkter i varukorgen
+      const totalItemsInCart = existingCart.reduce(
+        (total, item) => total + item.quantity,
+        0
+      );
+
+      // Kontrollera om varukorgen redan har 5 eller fler produkter
+      if (totalItemsInCart >= 5) {
+        alert("Du kan endast ha maximalt 5 produkter i varukorgen.");
+        setIsUpdating(false);
+        return;
+      }
+
       const existingItem = existingCart.find((item) => item.id === product.id);
       const token = getToken();
 
@@ -163,18 +176,21 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       try {
         await updateProductStock(product.id, 1, token);
 
+        // Uppdatera localStorage efter att backend-uppdateringen lyckats
         localStorage.setItem(cartKey, JSON.stringify(existingCart));
         console.log(`${product.name} har lagts till i varukorgen.`);
 
+        // Starta om timeouten för att tömma varukorgen
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
         timeoutRef.current = setTimeout(() => {
           console.log("Timeout har gått ut, varukorgen töms...");
           clearCart();
-        }, 20000);
+        }, 300000); // 20 sekunder = 20000
       } catch (error) {
         console.error("Error updating stock:", error);
+        // Rollback om det blir ett serverfel
         setProduct((prevProduct) => ({
           ...prevProduct,
           stock: prevProduct.stock + 1,
